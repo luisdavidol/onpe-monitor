@@ -20,7 +20,6 @@ Monitoreo en tiempo real de los resultados de la **Segunda Vuelta Electoral 2026
 | Túnel público | Cloudflare Tunnel (`cloudflared`) |
 | Hosting estático | Firebase Hosting |
 | CI/CD | GitHub Actions (auto-deploy a Firebase en push a `main`) |
-| Servicio cloud (opcional) | Render.com |
 
 ---
 
@@ -89,7 +88,7 @@ npm install
 npm start
 ```
 
-Esto inicia Express en `http://localhost:3000`. El servidor automáticamente hace un primer scraping a los 5 segundos de iniciar y luego cada 60 segundos.
+Esto inicia Express en `http://localhost:3000`. El servidor automáticamente hace un primer scraping al segundo de iniciar y luego cada 60 segundos.
 
 ### 2. Exponer con Cloudflare Tunnel (para acceso público)
 
@@ -161,3 +160,23 @@ npx firebase-tools deploy --only hosting --project onpe-elecciones-2026
 ```
 
 ### Cloudflare Tunnel (backend)
+
+Para exponer el backend públicamente:
+
+```bash
+cloudflared tunnel --url http://localhost:3000
+```
+
+Esto genera una URL tipo `https://xxxx.trycloudflare.com`. Actualiza `API_URL` en `public/index.html` con esa URL antes de desplegar el frontend.
+
+### Verificación de salud
+
+```powershell
+.\health-check.ps1
+```
+
+Verifica el estado del servidor local, tunnel, API pública y Firebase Hosting.
+
+### URL de producción
+
+- **Firebase Hosting:** [https://onpe-elecciones-2026.web.app](https://onpe-elecciones-2026.web.app)
