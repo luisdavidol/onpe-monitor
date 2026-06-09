@@ -43,7 +43,7 @@ if ($cf) {
 }
 
 # 3. Cloudflare API
-Write-Host "[3/5] Cloudflare API..." -NoNewline
+Write-Host "[3/4] Cloudflare API..." -NoNewline
 try {
     $cfUrl = Get-Content "$env:TEMP\cf_err.txt" -ErrorAction SilentlyContinue | Select-String "https://.*trycloudflare.com" | ForEach-Object { $_.Matches.Value } | Select-Object -Last 1
     if ($cfUrl) {
@@ -59,7 +59,7 @@ try {
 }
 
 # 4. Firebase
-Write-Host "[4/5] Firebase Hosting..." -NoNewline
+Write-Host "[4/4] Firebase Hosting..." -NoNewline
 try {
     Invoke-WebRequest -Uri "https://onpe-elecciones-2026.web.app" -UseBasicParsing -TimeoutSec 10 | Out-Null
     Write-Host " ON" -ForegroundColor Green
