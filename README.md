@@ -160,20 +160,4 @@ El deploy a Firebase es automático vía GitHub Actions al hacer push a `main`.
 npx firebase-tools deploy --only hosting --project onpe-elecciones-2026
 ```
 
-### Render.com (backend)
-
-El archivo `render.yaml` define el servicio. Para desplegar:
-
-1. Conectar el repositorio de GitHub en [render.com](https://render.com)
-2. Crear un **Web Service** apuntando al repo
-3. Render detecta `render.yaml` automáticamente:
-   - Build: `npm install`
-   - Start: `npm start`
-   - Runtime: Node.js
-
----
-
-## Mantenimiento
-
-- La URL del túnel de Cloudflare es **temporal**. Si el túnel se reinicia, hay que actualizar `API_URL` en `public/index.html` y redeployar a Firebase.
-- Si la ONPE cambia la estructura HTML de su web, el scraping en `server.js` puede romperse y requerir ajustes en la función `fetchONPEData()`.
+### Cloudflare Tunnel (backend)
