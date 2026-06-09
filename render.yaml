@@ -1,9 +1,0 @@
-{
-  "name": "onpe-elecciones-monitor",
-  "runtime": "node",
-  "buildCommand": "npm install",
-  "startCommand": "npm start",
-  "env": {
-    "NODE_ENV": "production"
-  }
-}
