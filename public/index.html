@@ -6,36 +6,50 @@
     <title>Elecciones Perú - ONPE</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+        }
         body {
             font-family: 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             color: #fff;
-            min-height: 100vh;
-            padding: 20px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .container { max-width: 700px; margin: 0 auto; }
-        h1 { color: #fbbf24; text-align: center; margin-bottom: 5px; font-size: 1.6rem; }
-        .subtitle { text-align: center; color: #94a3b8; font-size: 0.85rem; margin-bottom: 25px; }
-        .actas { text-align: center; color: #fbbf24; font-size: 1rem; margin-bottom: 5px; font-weight: 600; }
-        .last-update { text-align: center; color: #64748b; font-size: 0.85rem; margin-bottom: 20px; }
+        .container {
+            display: flex;
+            gap: 18px;
+            max-width: 1050px;
+            width: 100%;
+            align-items: stretch;
+        }
+        .main-col { flex: 1; min-width: 0; }
+        .side-col { width: 240px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+        h1 { color: #fbbf24; text-align: center; margin-bottom: 2px; font-size: 1.4rem; }
+        .subtitle { text-align: center; color: #94a3b8; font-size: 0.75rem; margin-bottom: 10px; }
+        .actas { text-align: center; color: #fbbf24; font-size: 0.85rem; margin-bottom: 2px; font-weight: 600; }
+        .last-update { text-align: center; color: #64748b; font-size: 0.72rem; margin-bottom: 10px; }
 
-        .candidates { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        @media (max-width: 500px) { .candidates { grid-template-columns: 1fr; } }
+        .candidates { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        @media (max-width: 768px) { .candidates { grid-template-columns: 1fr; } }
 
         .card {
             background: rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 10px;
+            padding: 12px;
             text-align: center;
             transition: all 0.3s;
         }
-        .card.winner { border: 2px solid #fbbf24; box-shadow: 0 0 20px rgba(251,191,36,0.3); }
+        .card.winner { border: 2px solid #fbbf24; box-shadow: 0 0 16px rgba(251,191,36,0.3); }
 
         .logo {
-            width: 200px;
-            height: 200px;
-            border-radius: 10px;
-            margin: 0 auto 10px;
+            width: 130px;
+            height: 130px;
+            border-radius: 8px;
+            margin: 0 auto 8px;
             overflow: hidden;
         }
         .logo img {
@@ -44,31 +58,31 @@
             object-fit: cover;
         }
 
-        .name { font-size: 1.1rem; font-weight: 600; margin-bottom: 3px; }
-        .party { color: #94a3b8; font-size: 0.8rem; margin-bottom: 15px; }
-        .votes { font-size: 2rem; font-weight: 700; color: #4ade80; }
-        .label { color: #64748b; font-size: 0.75rem; }
-        .percent { color: #c4b5fd; margin-top: 5px; font-size: 1rem; }
+        .name { font-size: 1rem; font-weight: 600; margin-bottom: 2px; }
+        .party { color: #94a3b8; font-size: 0.72rem; margin-bottom: 10px; }
+        .votes { font-size: 1.6rem; font-weight: 700; color: #4ade80; }
+        .label { color: #64748b; font-size: 0.7rem; }
+        .percent { color: #c4b5fd; margin-top: 3px; font-size: 0.9rem; }
 
         .diff-box {
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #1e293b;
-            border-radius: 10px;
-            padding: 15px;
+            border-radius: 8px;
+            padding: 10px;
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
-        .diff-label { font-size: 0.8rem; opacity: 0.8; }
-        .diff-value { font-size: 1.8rem; font-weight: 700; }
+        .diff-label { font-size: 0.7rem; opacity: 0.8; }
+        .diff-value { font-size: 1.4rem; font-weight: 700; }
 
         .winner-box {
             background: rgba(74, 222, 128, 0.15);
             border: 2px solid #4ade80;
-            border-radius: 10px;
-            padding: 15px;
+            border-radius: 8px;
+            padding: 10px;
             text-align: center;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
             font-weight: 600;
         }
         .winner-box.losing {
@@ -77,25 +91,25 @@
             color: #f87171;
         }
 
-        .progress { display: flex; height: 35px; border-radius: 6px; overflow: hidden; margin-bottom: 20px; }
+        .progress { display: flex; height: 28px; border-radius: 5px; overflow: hidden; margin-bottom: 12px; }
         .bar1 { background: linear-gradient(90deg, #e91e63, #f06292); display: flex; align-items: center; justify-content: center; transition: width 0.5s; }
         .bar2 { background: linear-gradient(90deg, #1976d2, #42a5f5); display: flex; align-items: center; justify-content: center; transition: width 0.5s; }
-        .bar span { font-weight: 600; font-size: 0.85rem; }
+        .bar span { font-weight: 600; font-size: 0.75rem; }
 
-        .update-info { text-align: center; color: #64748b; font-size: 0.8rem; }
+        .update-info { text-align: center; color: #64748b; font-size: 0.7rem; }
         .countdown { color: #fbbf24; font-weight: 600; }
 
-        .status { text-align: center; margin-top: 20px; }
+        .status { text-align: center; margin-top: 8px; }
         .status-dot {
             display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            margin-right: 5px;
+            margin-right: 4px;
         }
         .status-dot.online { background: #4ade80; }
         .status-dot.offline { background: #ef4444; }
-        .status-text { color: #94a3b8; font-size: 0.85rem; }
+        .status-text { color: #94a3b8; font-size: 0.72rem; }
 
         .loading { text-align: center; padding: 20px; color: #64748b; }
         .spinner {
@@ -124,13 +138,13 @@
         .legend {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-top: 15px;
-            font-size: 0.8rem;
+            gap: 15px;
+            margin-top: 8px;
+            font-size: 0.7rem;
             color: #94a3b8;
         }
-        .legend-item { display: flex; align-items: center; gap: 5px; }
-        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
         .legend-dot.fp { background: #e91e63; }
         .legend-dot.rp { background: #2196f3; }
 
@@ -138,19 +152,16 @@
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(125, 42, 232, 0.4);
             border-radius: 12px;
-            padding: 12px 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 20px;
+            padding: 14px;
+            text-align: center;
         }
         .yape-photo {
-            width: 64px;
-            height: 64px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
-            flex-shrink: 0;
             overflow: hidden;
             border: 2px solid #c084fc;
+            margin: 0 auto 10px;
         }
         .yape-photo img {
             width: 100%;
@@ -158,11 +169,11 @@
             object-fit: cover;
         }
         .yape-qr {
-            width: 64px;
-            height: 64px;
+            width: 130px;
+            height: 130px;
             border-radius: 6px;
-            flex-shrink: 0;
             overflow: hidden;
+            margin: 0 auto 10px;
         }
         .yape-qr img {
             width: 100%;
@@ -175,16 +186,28 @@
         .yape-text .yape-label {
             color: #c084fc;
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
         .yape-text .yape-msg {
             color: #94a3b8;
-            font-size: 0.78rem;
+            font-size: 0.72rem;
+            margin-top: 2px;
+        }
+
+        @media (max-width: 768px) {
+            html, body { overflow: auto; height: auto; }
+            body { padding: 10px; }
+            .container { flex-direction: column; }
+            .side-col { width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; }
+            .yape-box { display: flex; align-items: center; gap: 12px; text-align: left; }
+            .yape-photo { width: 60px; height: 60px; margin: 0; }
+            .yape-qr { width: 80px; height: 80px; margin: 0; }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="main-col">
         <h1>Elecciones Perú 2026</h1>
         <p class="subtitle">Segunda Vuelta - Fuente: ONPE</p>
         <p class="actas" id="actas">Actas contabilizadas: --%</p>
@@ -236,12 +259,14 @@
                 <div class="legend-item"><div class="legend-dot rp"></div> RP</div>
             </div>
 
-            <div class="update-info" style="margin-top: 20px;">
+            <div class="update-info" style="margin-top: 12px;">
                 Actualizado: <span id="lastUpdate">-</span><br>
                 Próxima actualización: <span class="countdown" id="countdown">1:00</span>
             </div>
         </div>
+        </div>
 
+        <div class="side-col">
         <div class="yape-box">
             <div class="yape-photo"><img src="yo.jpeg" alt="Foto"></div>
             <div class="yape-qr"><img src="Yape.jpeg" alt="Yape QR"></div>
@@ -254,6 +279,7 @@
         <div class="status" id="status">
             <span class="status-dot offline"></span>
             <span class="status-text">Conectando...</span>
+        </div>
         </div>
     </div>
 
