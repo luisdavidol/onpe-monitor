@@ -223,7 +223,7 @@
         <div id="content" style="display: none;">
             <div class="candidates">
                 <div class="card" id="card1">
-                    <div class="logo"><img id="img1" src="Keiko%20triste.png" alt="Keiko"></div>
+                    <div class="logo"><img id="img1" src="Keiko%20triste.png?v=2" alt="Keiko"></div>
                     <div class="name" id="name1">Keiko Fujimori</div>
                     <div class="party" id="party1">Fuerza Popular</div>
                     <div class="votes" id="votes1">0</div>
@@ -353,8 +353,8 @@
                 const f = frasesKeiko[phraseIdx1 % frasesKeiko.length];
                 document.getElementById('winnerText').textContent = `Ganador por ahora: ${data.candidate1.name} — "${f}"`;
                 phraseIdx1++;
-                document.getElementById('img1').src = 'Keiko%20feliz.png';
-                document.getElementById('img2').src = 'RS%20triste.png';
+                document.getElementById('img1').src = 'Keiko%20feliz.png?v=2';
+                document.getElementById('img2').src = 'RS%20triste.png?v=2';
             } else {
                 document.getElementById('card2').classList.add('winner');
                 document.getElementById('card1').classList.remove('winner');
@@ -362,8 +362,8 @@
                 const f = frasesRoberto[phraseIdx2 % frasesRoberto.length];
                 document.getElementById('winnerText').textContent = `Ganador por ahora: ${data.candidate2.name} — "${f}"`;
                 phraseIdx2++;
-                document.getElementById('img1').src = 'Keiko%20triste.png';
-                document.getElementById('img2').src = 'RS%20feliz.png';
+                document.getElementById('img1').src = 'Keiko%20triste.png?v=2';
+                document.getElementById('img2').src = 'RS%20feliz.png?v=2';
             }
 
             const updateTime = new Date(data.timestamp);
