@@ -39,17 +39,19 @@
         .card {
             background: rgba(255,255,255,0.08);
             border-radius: 10px;
-            padding: 12px;
-            text-align: center;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
             transition: all 0.3s;
         }
         .card.winner { border: 2px solid #fbbf24; box-shadow: 0 0 16px rgba(251,191,36,0.3); }
 
         .logo {
-            width: 130px;
-            height: 130px;
+            width: 200px;
+            height: 200px;
             border-radius: 8px;
-            margin: 0 auto 8px;
+            flex-shrink: 0;
             overflow: hidden;
         }
         .logo img {
@@ -58,11 +60,13 @@
             object-fit: cover;
         }
 
-        .name { font-size: 1rem; font-weight: 600; margin-bottom: 2px; }
-        .party { color: #94a3b8; font-size: 0.72rem; margin-bottom: 10px; }
-        .votes { font-size: 1.6rem; font-weight: 700; color: #4ade80; }
-        .label { color: #64748b; font-size: 0.7rem; }
-        .percent { color: #c4b5fd; margin-top: 3px; font-size: 0.9rem; }
+        .card-info { text-align: left; }
+
+        .name { font-size: 1.2rem; font-weight: 600; margin-bottom: 2px; }
+        .party { color: #94a3b8; font-size: 0.78rem; margin-bottom: 10px; }
+        .votes { font-size: 2rem; font-weight: 700; color: #4ade80; }
+        .label { color: #64748b; font-size: 0.72rem; }
+        .percent { color: #c4b5fd; margin-top: 4px; font-size: 1rem; }
 
         .diff-box {
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
@@ -196,12 +200,16 @@
 
         @media (max-width: 768px) {
             html, body { overflow: auto; height: auto; }
-            body { padding: 10px; }
-            .container { flex-direction: column; }
+            body { padding: 8px; }
+            .container { flex-direction: column; gap: 12px; }
             .side-col { width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; }
             .yape-box { display: flex; align-items: center; gap: 12px; text-align: left; }
             .yape-photo { width: 60px; height: 60px; margin: 0; }
             .yape-qr { width: 80px; height: 80px; margin: 0; }
+            .card { flex-direction: column; text-align: center; }
+            .card-info { text-align: center; }
+            .logo { width: 160px; height: 160px; margin: 0 auto 8px; }
+            .candidates { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -224,19 +232,23 @@
             <div class="candidates">
                 <div class="card" id="card1">
                     <div class="logo"><img id="img1" src="Keiko%20triste.png?v=2" alt="Keiko"></div>
+                    <div class="card-info">
                     <div class="name" id="name1">Keiko Fujimori</div>
                     <div class="party" id="party1">Fuerza Popular</div>
                     <div class="votes" id="votes1">0</div>
                     <div class="label">votos</div>
                     <div class="percent" id="percent1">0%</div>
+                    </div>
                 </div>
                 <div class="card" id="card2">
                     <div class="logo"><img id="img2" src="RS%20triste.png" alt="Roberto"></div>
+                    <div class="card-info">
                     <div class="name" id="name2">Roberto Sánchez</div>
                     <div class="party" id="party2">Renovación Popular</div>
                     <div class="votes" id="votes2">0</div>
                     <div class="label">votos</div>
                     <div class="percent" id="percent2">0%</div>
+                    </div>
                 </div>
             </div>
 
