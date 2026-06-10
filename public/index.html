@@ -133,6 +133,41 @@
         .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
         .legend-dot.fp { background: #e91e63; }
         .legend-dot.rp { background: #2196f3; }
+
+        .yape-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(125, 42, 232, 0.4);
+            border-radius: 12px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .yape-qr {
+            width: 70px;
+            height: 70px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .yape-qr img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .yape-text {
+            line-height: 1.4;
+        }
+        .yape-text .yape-label {
+            color: #c084fc;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .yape-text .yape-msg {
+            color: #94a3b8;
+            font-size: 0.78rem;
+        }
     </style>
 </head>
 <body>
@@ -191,6 +226,14 @@
             <div class="update-info" style="margin-top: 20px;">
                 Actualizado: <span id="lastUpdate">-</span><br>
                 Próxima actualización: <span class="countdown" id="countdown">1:00</span>
+            </div>
+        </div>
+
+        <div class="yape-box">
+            <div class="yape-qr"><img src="Yape.jpeg" alt="Yape QR"></div>
+            <div class="yape-text">
+                <div class="yape-label">Apoyo al talento de Claro</div>
+                <div class="yape-msg">Yapea tu apoyo y contribuye con el monitoreo electoral en tiempo real</div>
             </div>
         </div>
 
