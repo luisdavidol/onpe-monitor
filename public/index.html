@@ -32,15 +32,10 @@
         .card.winner { border: 2px solid #fbbf24; box-shadow: 0 0 20px rgba(251,191,36,0.3); }
 
         .logo {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
+            width: 170px;
+            height: 170px;
+            border-radius: 10px;
             margin: 0 auto 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            font-weight: bold;
             overflow: hidden;
         }
         .logo img {
@@ -48,8 +43,6 @@
             height: 100%;
             object-fit: cover;
         }
-        .logo.fp { background: #e91e63; }
-        .logo.rp { background: #2196f3; }
 
         .name { font-size: 1.1rem; font-weight: 600; margin-bottom: 3px; }
         .party { color: #94a3b8; font-size: 0.8rem; margin-bottom: 15px; }
@@ -159,7 +152,7 @@
         <div id="content" style="display: none;">
             <div class="candidates">
                 <div class="card" id="card1">
-                    <div class="logo fp"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Keiko_Fujimori_%282021%29.jpg/220px-Keiko_Fujimori_%282021%29.jpg" alt="Keiko" onerror="this.style.display='none'; this.parentElement.textContent='KF';"></div>
+                    <div class="logo"><img id="img1" src="Keiko%20triste.png" alt="Keiko"></div>
                     <div class="name" id="name1">Keiko Fujimori</div>
                     <div class="party" id="party1">Fuerza Popular</div>
                     <div class="votes" id="votes1">0</div>
@@ -167,7 +160,7 @@
                     <div class="percent" id="percent1">0%</div>
                 </div>
                 <div class="card" id="card2">
-                    <div class="logo rp"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Roberto_S%C3%A1nchez_Palomino_-_2024.png/220px-Roberto_S%C3%A1nchez_Palomino_-_2024.png" alt="Roberto" onerror="this.style.display='none'; this.parentElement.textContent='RS';"></div>
+                    <div class="logo"><img id="img2" src="RS%20triste.png" alt="Roberto"></div>
                     <div class="name" id="name2">Roberto Sánchez</div>
                     <div class="party" id="party2">Renovación Popular</div>
                     <div class="votes" id="votes2">0</div>
@@ -208,9 +201,33 @@
     </div>
 
     <script>
-        const API_URL = 'https://affect-month-movement-express.trycloudflare.com/api';
+        const API_URL = 'https://dos-ide-outputs-sink.trycloudflare.com/api';
         let countdown = 60;
         let timer;
+        let phraseIdx1 = 0;
+        let phraseIdx2 = 0;
+
+        const frasesKeiko = [
+            "¡La tercera fue la vencida!",
+            "El fujimorismo vuelve a Palacio",
+            "El 50% celebra, el otro 50% saca pasaporte",
+            "Las cacerolas siguen guardadas... por ahora",
+            "Fuerza Popular: 'esta vez sí'",
+            "¿Y ahora quién podrá defendernos?",
+            "Keiko presidenta, memes asegurados",
+            "Con Keiko el freezer está prohibido"
+        ];
+
+        const frasesRoberto = [
+            "¡Ganó el profe! Vacaciones para todos",
+            "De anónimo a presidente en 3 meses",
+            "Perú dijo: probemos algo diferente",
+            "La izquierda respira por primera vez",
+            "¿Roberto qué? — Medio Perú en Google",
+            "El cambio llegó... sin avisar",
+            "Tarea para el Perú: sobrevivir 5 años",
+            "Juntos por el Perú... o lo que quede"
+        ];
 
         function formatNum(n) {
             return new Intl.NumberFormat('es-PE').format(n);
@@ -250,12 +267,20 @@
                 document.getElementById('card1').classList.add('winner');
                 document.getElementById('card2').classList.remove('winner');
                 document.getElementById('winnerBox').classList.remove('losing');
-                document.getElementById('winnerText').textContent = `El ganador por ahora es: ${data.candidate1.name} :) Y el Perú sigue jodido!`;
+                const f = frasesKeiko[phraseIdx1 % frasesKeiko.length];
+                document.getElementById('winnerText').textContent = `Ganador por ahora: ${data.candidate1.name} — "${f}"`;
+                phraseIdx1++;
+                document.getElementById('img1').src = 'Keiko%20feliz.png';
+                document.getElementById('img2').src = 'RS%20triste.png';
             } else {
                 document.getElementById('card2').classList.add('winner');
                 document.getElementById('card1').classList.remove('winner');
                 document.getElementById('winnerBox').classList.add('losing');
-                document.getElementById('winnerText').textContent = `El ganador por ahora es: ${data.candidate2.name} :( Y el Perú sigue jodido!`;
+                const f = frasesRoberto[phraseIdx2 % frasesRoberto.length];
+                document.getElementById('winnerText').textContent = `Ganador por ahora: ${data.candidate2.name} — "${f}"`;
+                phraseIdx2++;
+                document.getElementById('img1').src = 'Keiko%20triste.png';
+                document.getElementById('img2').src = 'RS%20feliz.png';
             }
 
             const updateTime = new Date(data.timestamp);
