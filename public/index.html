@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Elecciones Perú - ONPE</title>
     <style>
         /* === RESET: quita márgenes y padding por defecto de todo === */
@@ -250,7 +253,7 @@
             <div class="candidates">
                 <!-- Keiko Fujimori -->
                 <div class="card" id="card1">
-                    <div class="logo"><img id="img1" src="Keiko%20triste.png?v=2" alt="Keiko"></div>
+                    <div class="logo"><img id="img1" src="Keiko%20triste.png?v=3" alt="Keiko"></div>
                     <div class="card-info">
                     <div class="name" id="name1">Keiko Fujimori</div>
                     <div class="party" id="party1">Fuerza Popular</div>
@@ -412,8 +415,8 @@
                 const f = frasesKeiko[phraseIdx1 % frasesKeiko.length];
                 document.getElementById('winnerText').textContent = `Ganador por ahora: ${data.candidate1.name} — "${f}"`;
                 phraseIdx1++;
-                document.getElementById('img1').src = 'Keiko%20feliz.png?v=2';   // Keiko feliz
-                document.getElementById('img2').src = 'RS%20triste.png?v=2';     // Roberto triste
+                document.getElementById('img1').src = 'Keiko%20feliz.png?v=3';   // Keiko feliz
+                document.getElementById('img2').src = 'RS%20triste.png?v=3';     // Roberto triste
             } else {
                 // ROBERTO gana
                 document.getElementById('card2').classList.add('winner');
@@ -422,8 +425,8 @@
                 const f = frasesRoberto[phraseIdx2 % frasesRoberto.length];
                 document.getElementById('winnerText').textContent = `Ganador por ahora: ${data.candidate2.name} — "${f}"`;
                 phraseIdx2++;
-                document.getElementById('img1').src = 'Keiko%20triste.png?v=2';  // Keiko triste
-                document.getElementById('img2').src = 'RS%20feliz.png?v=2';      // Roberto feliz
+                document.getElementById('img1').src = 'Keiko%20triste.png?v=3';  // Keiko triste
+                document.getElementById('img2').src = 'RS%20feliz.png?v=3';      // Roberto feliz
             }
 
             // --- fecha y hora de la última actualización ---
