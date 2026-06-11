@@ -112,6 +112,43 @@
         }
 
         .progress { display: flex; height: 28px; border-radius: 5px; overflow: hidden; margin-bottom: 12px; }
+
+        .actas-box {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .actas-box h3 {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .actas-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        .actas-item {
+            background: rgba(255,255,255,0.04);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+        }
+        .actas-item .a-label { font-size: 0.65rem; color: #64748b; display: block; margin-bottom: 2px; }
+        .actas-item .a-pct { font-size: 1.1rem; font-weight: 700; color: #4ade80; }
+        .actas-item .a-cant { font-size: 0.7rem; color: #94a3b8; }
+        .actas-item.envio .a-pct { color: #fbbf24; }
+        .actas-item.pend .a-pct { color: #f87171; }
+        .actas-total {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 0.72rem;
+            color: #64748b;
+        }
+        .actas-total strong { color: #e2e8f0; }
         .bar1 { background: linear-gradient(90deg, #e91e63, #f06292); display: flex; align-items: center; justify-content: center; transition: width 0.5s; }
         .bar2 { background: linear-gradient(90deg, #1976d2, #42a5f5); display: flex; align-items: center; justify-content: center; transition: width 0.5s; }
         .bar span { font-weight: 600; font-size: 0.75rem; }
@@ -349,6 +386,31 @@
         <p class="actas" id="actas">Actas contabilizadas: --%</p>
         <p class="last-update" id="lastUpdateInfo">Ultima actualizacion: --</p>
 
+        <div class="actas-box" id="actasBox" style="display: none;">
+            <h3>Actas procesadas</h3>
+            <div class="actas-grid">
+                <div class="actas-item">
+                    <span class="a-label">Contabilizadas</span>
+                    <div class="a-pct" id="actasContPct">--</div>
+                    <div class="a-cant" id="actasContCant">--</div>
+                </div>
+                <div class="actas-item envio">
+                    <span class="a-label">Para envío JEE</span>
+                    <div class="a-pct" id="actasEnvPct">--</div>
+                    <div class="a-cant" id="actasEnvCant">--</div>
+                </div>
+                <div class="actas-item pend">
+                    <span class="a-label">Pendientes</span>
+                    <div class="a-pct" id="actasPendPct">--</div>
+                    <div class="a-cant" id="actasPendCant">--</div>
+                </div>
+            </div>
+            <div class="actas-total">
+                Procesadas: <strong id="actasProcPct">--</strong> &middot;
+                Total: <strong id="actasTotal">--</strong> actas
+            </div>
+        </div>
+
         <div id="error"></div>
 
         <div class="loading" id="loading">
@@ -530,6 +592,18 @@
             const diff = Math.abs(data.candidate1.votes - data.candidate2.votes);
 
             document.getElementById('actas').textContent = 'Actas contabilizadas: ' + data.actasContabilizadas + '%';
+
+            if (data.actas) {
+                document.getElementById('actasBox').style.display = 'block';
+                document.getElementById('actasContPct').textContent = data.actas.contabilizadas.porcentaje + '%';
+                document.getElementById('actasContCant').textContent = formatNum(data.actas.contabilizadas.cantidad);
+                document.getElementById('actasEnvPct').textContent = data.actas.envioJee.porcentaje + '%';
+                document.getElementById('actasEnvCant').textContent = formatNum(data.actas.envioJee.cantidad);
+                document.getElementById('actasPendPct').textContent = data.actas.pendientes.porcentaje + '%';
+                document.getElementById('actasPendCant').textContent = formatNum(data.actas.pendientes.cantidad);
+                document.getElementById('actasProcPct').textContent = data.actas.procesadas + '%';
+                document.getElementById('actasTotal').textContent = formatNum(data.actas.total);
+            }
 
             document.getElementById('name1').textContent = data.candidate1.name;
             document.getElementById('party1').textContent = data.candidate1.party;

@@ -57,78 +57,140 @@ async function scrapeWithPuppeteer() {
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
         await page.setDefaultNavigationTimeout(45000);
 
-        console.log('Navegando a ONPE...');
+        // Pagina 1: Resumen (votos)
+        console.log('Scrapeando /main/resumen...');
         try {
             await page.goto('https://resultadosegundavuelta.onpe.gob.pe/main/resumen', {
-                waitUntil: 'networkidle2',
-                timeout: 45000
+                waitUntil: 'networkidle2', timeout: 45000
             });
-        } catch (e) {
-            console.log('Nav warning:', e.message.substring(0, 80));
-        }
+        } catch (e) { console.log('Nav warning:', e.message.substring(0, 80)); }
 
-        console.log('Esperando renderizado...');
         await new Promise(r => setTimeout(r, 8000));
 
-        console.log('Extrayendo datos...');
-        const data = await page.evaluate(() => {
+        const resumen = await page.evaluate(() => {
             const text = document.body.innerText;
             const lines = text.split('\n').map(l => l.trim());
+            let keikoVotes = 0, robertoVotes = 0, actasPorcentaje = 0;
 
-            let keikoVotes = 0;
-            let robertoVotes = 0;
-            let actasPorcentaje = 0;
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                if (line.includes('%') && !line.includes('votos')) {
+                    const match = line.match(/([\d.]+)\s*%/);
+                    if (match && i < 5) actasPorcentaje = parseFloat(match[1]);
+                }
+                if (line.includes('FUJIMORI') && !line.includes('ROBERTO')) {
+                    for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
+                        const m = lines[j].match(/([\d']+),\s*(\d+)\s*votos/i);
+                        if (m) { keikoVotes = parseInt((m[1] + m[2]).replace(/'/g, '')); break; }
+                    }
+                }
+                if ((line.includes('SANCHEZ') || (line.includes('ROBERTO') && line.length < 30)) && !line.includes('FUJIMORI')) {
+                    for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
+                        const m = lines[j].match(/([\d']+),\s*(\d+)\s*votos/i);
+                        if (m) { robertoVotes = parseInt((m[1] + m[2]).replace(/'/g, '')); break; }
+                    }
+                }
+            }
+            return { keikoVotes, robertoVotes, actasPorcentaje };
+        });
+
+        console.log('Resumen:', JSON.stringify(resumen));
+
+        // Pagina 2: Actas (contabilizadas, pendientes, envio JEE)
+        console.log('Scrapeando /main/actas...');
+        try {
+            await page.goto('https://resultadosegundavuelta.onpe.gob.pe/main/actas', {
+                waitUntil: 'networkidle2', timeout: 45000
+            });
+        } catch (e) { console.log('Nav warning:', e.message.substring(0, 80)); }
+
+        await new Promise(r => setTimeout(r, 8000));
+
+        const actas = await page.evaluate(() => {
+            const text = document.body.innerText;
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+            let contabilizadasPct = 0, contabilizadasCant = 0;
+            let envioJeePct = 0, envioJeeCant = 0;
+            let pendientesPct = 0, pendientesCant = 0;
+            let total = 0;
+            let procesadasPct = 0;
 
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
 
-                if (line.includes('%') && !line.includes('votos')) {
-                    const match = line.match(/([\d.]+)\s*%/);
-                    if (match && i < 5) {
-                        actasPorcentaje = parseFloat(match[1]);
+                if (line.includes('Procesadas al')) {
+                    const m = line.match(/([\d.]+)\s*%/);
+                    if (m) procesadasPct = parseFloat(m[1]);
+                }
+
+                if (line.includes('Contabilizadas') && !line.includes('Actas')) {
+                    for (let j = i; j < Math.min(i + 3, lines.length); j++) {
+                        const m = lines[j].match(/([\d.]+)\s*%/);
+                        if (m && !lines[j].includes('Procesadas')) { contabilizadasPct = parseFloat(m[1]); break; }
+                    }
+                    for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
+                        if (lines[j].includes('%')) continue;
+                        const n = parseInt(lines[j].replace(/[,.\s]/g, ''));
+                        if (n > 100) { contabilizadasCant = n; break; }
                     }
                 }
 
-                if (line.includes('FUJIMORI') && !line.includes('ROBERTO')) {
-                    for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
-                        const voteLine = lines[j];
-                        const match = voteLine.match(/([\d']+),\s*(\d+)\s*votos/i);
-                        if (match) {
-                            keikoVotes = parseInt((match[1] + match[2]).replace(/'/g, ''));
-                            break;
-                        }
+                if (line.includes('envío al JEE') || line.includes('envio al JEE')) {
+                    for (let j = i; j < Math.min(i + 3, lines.length); j++) {
+                        const m = lines[j].match(/([\d.]+)\s*%/);
+                        if (m) { envioJeePct = parseFloat(m[1]); break; }
+                    }
+                    for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
+                        if (lines[j].includes('%')) continue;
+                        const n = parseInt(lines[j].replace(/[,.\s]/g, ''));
+                        if (n > 0) { envioJeeCant = n; break; }
                     }
                 }
-                if (line.includes('SANCHEZ') || (line.includes('ROBERTO') && line.length < 30)) {
-                    for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
-                        const voteLine = lines[j];
-                        const match = voteLine.match(/([\d']+),\s*(\d+)\s*votos/i);
-                        if (match) {
-                            robertoVotes = parseInt((match[1] + match[2]).replace(/'/g, ''));
-                            break;
-                        }
+
+                if (line.includes('Pendientes') && !line.includes('envío')) {
+                    for (let j = i; j < Math.min(i + 3, lines.length); j++) {
+                        const m = lines[j].match(/([\d.]+)\s*%/);
+                        if (m) { pendientesPct = parseFloat(m[1]); break; }
                     }
+                    for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
+                        if (lines[j].includes('%')) continue;
+                        const n = parseInt(lines[j].replace(/[,.\s]/g, ''));
+                        if (n >= 0) { pendientesCant = n; break; }
+                    }
+                }
+
+                if (line.startsWith('TOTAL')) {
+                    const m = line.replace(/[,.\s]/g, '').match(/(\d+)/);
+                    if (m) total = parseInt(m[1]);
                 }
             }
 
-            return { keikoVotes, robertoVotes, actasPorcentaje };
+            return { contabilizadasPct, contabilizadasCant, envioJeePct, envioJeeCant, pendientesPct, pendientesCant, total, procesadasPct };
         });
+
+        console.log('Actas:', JSON.stringify(actas));
 
         await browser.close();
         browser = null;
 
-        console.log('Extraido:', JSON.stringify(data));
-
-        if (data.keikoVotes > 0 || data.robertoVotes > 0) {
+        if (resumen.keikoVotes > 0 || resumen.robertoVotes > 0 || actas.total > 0) {
             return {
-                candidate1: { ...CANDIDATES.candidate1, votes: data.keikoVotes || 0 },
-                candidate2: { ...CANDIDATES.candidate2, votes: data.robertoVotes || 0 },
-                actasContabilizadas: data.actasPorcentaje || 0,
+                candidate1: { ...CANDIDATES.candidate1, votes: resumen.keikoVotes || 0 },
+                candidate2: { ...CANDIDATES.candidate2, votes: resumen.robertoVotes || 0 },
+                actasContabilizadas: resumen.actasPorcentaje || 0,
+                actas: {
+                    contabilizadas: { porcentaje: actas.contabilizadasPct, cantidad: actas.contabilizadasCant },
+                    envioJee: { porcentaje: actas.envioJeePct, cantidad: actas.envioJeeCant },
+                    pendientes: { porcentaje: actas.pendientesPct, cantidad: actas.pendientesCant },
+                    procesadas: actas.procesadasPct,
+                    total: actas.total
+                },
                 timestamp: new Date().toISOString()
             };
         }
 
-        console.log('Sin votos encontrados');
+        console.log('Sin datos encontrados');
         return null;
     } finally {
         if (browser) try { await browser.close(); } catch (_) {}
