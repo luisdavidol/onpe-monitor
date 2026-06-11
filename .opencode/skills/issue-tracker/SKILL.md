@@ -117,12 +117,13 @@ Issues/YYYY-MM-DD_titulo-corto.md
 
 Usuario: "la web está caída, revisa qué pasa"
 
-1. Verificar servicios (Firebase, Cloud Run, Firestore)
-2. Revisar logs de Cloud Run
-3. Analizar el código
-4. Encontrar la causa raíz
-5. Implementar la corrección
-6. Desplegar
-7. Verificar que funciona
-8. Crear el issue documentando todo el proceso
-9. Dar resumen al usuario
+**Seguir el flujo del skill `onpe-deploy` (Fases 1-8):**
+
+1. **Fase 1 — Diagnosticar:** Verificar servicios (Firebase, Cloud Run, Firestore) y revisar logs
+2. **Fase 2 — Probar localmente:** Crear script de prueba Puppeteer, ejecutar en local
+3. **Fase 3 — Corregir:** Implementar fix basado en resultados de prueba local
+4. **Fase 4 — Verificar local:** Confirmar que el fix funciona en local
+5. **Fase 5 — Desplegar:** Solo si la verificación local pasó
+6. **Fase 6 — Verificar Cloud Run:** Confirmar que funciona en producción
+7. **Fase 7 — Push GitHub:** Solo si Cloud Run funciona
+8. **Fase 8 — Documentar:** Crear el issue con la plantilla de arriba
