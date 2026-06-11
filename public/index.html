@@ -525,8 +525,8 @@
 
         function updateUI(data) {
             const total = data.candidate1.votes + data.candidate2.votes;
-            const p1 = total > 0 ? ((data.candidate1.votes / total) * 100).toFixed(2) : 0;
-            const p2 = total > 0 ? ((data.candidate2.votes / total) * 100).toFixed(2) : 0;
+            const p1 = total > 0 ? ((data.candidate1.votes / total) * 100).toFixed(3) : 0;
+            const p2 = total > 0 ? ((data.candidate2.votes / total) * 100).toFixed(3) : 0;
             const diff = Math.abs(data.candidate1.votes - data.candidate2.votes);
 
             document.getElementById('actas').textContent = 'Actas contabilizadas: ' + data.actasContabilizadas + '%';
