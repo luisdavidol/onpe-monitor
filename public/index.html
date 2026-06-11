@@ -372,7 +372,7 @@
                     <div class="logo"><img id="img2" src="RS%20triste.png" alt="Roberto"></div>
                     <div class="card-info">
                     <div class="name" id="name2">Roberto Sanchez</div>
-                    <div class="party" id="party2">Renovacion Popular</div>
+                    <div class="party" id="party2">Juntos por el Peru</div>
                     <div class="votes" id="votes2">0</div>
                     <div class="label">votos</div>
                     <div class="percent" id="percent2">0%</div>
@@ -396,7 +396,7 @@
 
             <div class="legend">
                 <div class="legend-item"><div class="legend-dot fp"></div> FP (Fuerza Popular)</div>
-                <div class="legend-item"><div class="legend-dot rp"></div> RP (Renovacion Popular)</div>
+                <div class="legend-item"><div class="legend-dot rp"></div> JP (Juntos por el Peru)</div>
             </div>
 
             <div class="update-info" style="margin-top: 12px;">
@@ -459,25 +459,59 @@
         let likedSession = false;
 
         const frasesKeiko = [
-            "La tercera fue la vencida!",
-            "El fujimorismo vuelve a Palacio",
-            "El 50% celebra, el otro 50% saca pasaporte",
-            "Las cacerolas siguen guardadas... por ahora",
-            "Fuerza Popular: 'esta vez si'",
-            "Y ahora quien podra defendernos?",
-            "Keiko presidenta, memes asegurados",
-            "Con Keiko el freezer esta prohibido"
+            "La cuarta fue la vencida!",
+            "Keiko: 'esta vez si me dejaron ganar'",
+            "El fujimorismo vuelve a Palacio... otra vez",
+            "El 50% celebra, el otro 50% ya esta buscando pasaje",
+            "Las cacerolas se guardaron hasta nuevo aviso",
+            "Keiko presidenta: el freezer ahora es obligatorio",
+            "Y ahora quien podra defendernos? ... nadie",
+            "Keiko: 'no llore, no llore... bueno si'",
+            "Tres intentos despues, por fin sin fraude imaginario",
+            "Papa Fujimori desde el cielo: 'mi nina'",
+            "Keiko gana y Twitter/X se cae del llanto",
+            "El Peru dijo: bueno, ya que insistes tanto",
+            "Keiko: 'acepto este resultado con mucha dignidad'",
+            "Fuerza Popular: de la carcel al palacio en 4 intentos",
+            "Las encuestas otra vez fallaron... a favor esta vez",
+            "Keiko gana y Keiko no se lo cree",
+            "El TSE ya esta preparando la denuncia... de costumbre",
+            "Keiko: 'por fin puedo devolver el dinero... digo, gobernar'",
+            "Fujimorismo: 'era broma lo del golpe, verdad?'",
+            "Keiko gana y Alan Garcia en el mas alla: 'yo tambien'",
+            "La cuarta es la vencida, la quinta era por si acaso",
+            "Keiko: 'mi papa estaria orgulloso... o no'",
+            "El Peru: 'bueno, ya probamos todo lo demas'",
+            "Keiko gana y la DEA mira con atencion",
+            "Fuerza Popular celebra con un karaoke de 'Yo te sigo'"
         ];
 
         const frasesRoberto = [
-            "Gano el profe! Vacaciones para todos",
-            "De anonimo a presidente en 3 meses",
-            "Peru dijo: probemos algo diferente",
-            "La izquierda respira por primera vez",
-            "Roberto que? - Medio Peru en Google",
-            "El cambio llego... sin avisar",
-            "Tarea para el Peru: sobrevivir 5 anos",
-            "Juntos por el Peru... o lo que quede"
+            "El psicologo presidente: terapia gratis para todos",
+            "De anonimo a presidente en 3 meses, CV actualizado",
+            "Peru dijo: probemos algo completamente diferente",
+            "La izquierda respira por primera vez en 30 anos",
+            "Roberto que? - Medio Peru buscando en Google",
+            "El cambio llego... sin que nadie lo esperara",
+            "Sesion de terapia nacional: 'cuéntame tus problemas, Peru'",
+            "Juntos por el Peru... o lo que quede de el",
+            "El psicologo: 'el Peru tiene daddy issues'",
+            "Roberto gana y nadie sabe quien es su vice",
+            "De consultorio a Palacio en un solo debate",
+            "Roberto: 'no es izquierda, es terapia grupal'",
+            "El Peru: 'al menos este no roba... creo'",
+            "Juntos por el Peru: suena bonito, no?",
+            "Roberto: 'vengo a escuchar, no a gritar'",
+            "Psicologo presidente: el Peru necesita un abrazo",
+            "Roberto gana y Keiko pide segunda opinion",
+            "El cambio es ahora: de psicologo a estadista",
+            "Roberto: 'mi tesis era sobre gobernar paises'",
+            "Juntos por el Peru: el nombre ya era una promesa",
+            "Roberto gana y la derecha necesita terapia",
+            "El Peru: 'probemos al calladito por una vez'",
+            "Roberto: 'no tengo experiencia... en robar'",
+            "Psicologo presidente: primer acto, escuchar al pueblo",
+            "Roberto gana y el meme de 'quien es este?' se viraliza"
         ];
 
         function formatNum(n) {
