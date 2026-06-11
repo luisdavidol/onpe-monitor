@@ -6,43 +6,50 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Elecciones Perú - ONPE</title>
+    <title>Elecciones Peru - ONPE 2026</title>
     <style>
-        /* === RESET: quita márgenes y padding por defecto de todo === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* === PANTALLA COMPLETA SIN SCROLL === */
         html, body {
-            height: 100vh;      /* ocupa el 100% de la altura de la ventana */
-            overflow: hidden;   /* prohíbe el scroll, todo debe caber en una pantalla */
+            height: 100vh;
+            overflow: hidden;
         }
         body {
             font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e); /* fondo oscuro con degradado */
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             color: #fff;
             padding: 12px;
             display: flex;
-            align-items: center;      /* centra verticalmente */
-            justify-content: center;  /* centra horizontalmente */
+            align-items: center;
+            justify-content: center;
         }
 
-        /* === CONTENEDOR PRINCIPAL: 2 columnas (resultados | Yape) === */
         .container {
             display: flex;
             gap: 20px;
-            max-width: 1400px;
+            max-width: 1500px;
             width: 100%;
-            align-items: stretch;  /* ambas columnas igual de altas */
+            align-items: stretch;
         }
-        .main-col { flex: 1; min-width: 0; }  /* columna izquierda: resultados, se estira */
-        .side-col { width: 440px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }  /* columna derecha: Yape, ancho fijo */
-        /* === ENCABEZADOS === */
+        .main-col { flex: 1; min-width: 0; }
+        .side-col {
+            width: 400px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            max-height: calc(100vh - 24px);
+            padding-right: 4px;
+        }
+        .side-col::-webkit-scrollbar { width: 5px; }
+        .side-col::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
         h1 { color: #fbbf24; text-align: center; margin-bottom: 2px; font-size: 1.4rem; }
         .subtitle { text-align: center; color: #94a3b8; font-size: 0.75rem; margin-bottom: 10px; }
         .actas { text-align: center; color: #fbbf24; font-size: 0.85rem; margin-bottom: 2px; font-weight: 600; }
         .last-update { text-align: center; color: #64748b; font-size: 0.72rem; margin-bottom: 10px; }
 
-        /* === TARJETAS DE CANDIDATOS: 2 columnas, cada tarjeta tiene foto a la izquierda y datos a la derecha === */
         .candidates { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
         @media (max-width: 768px) { .candidates { grid-template-columns: 1fr; } }
 
@@ -50,28 +57,26 @@
             background: rgba(255,255,255,0.08);
             border-radius: 10px;
             padding: 14px;
-            display: flex;           /* foto y datos en fila horizontal */
-            align-items: center;     /* centrados verticalmente */
+            display: flex;
+            align-items: center;
             gap: 18px;
             transition: all 0.3s;
         }
-        .card.winner { border: 2px solid #fbbf24; box-shadow: 0 0 16px rgba(251,191,36,0.3); }  /* borde dorado al ganador */
+        .card.winner { border: 2px solid #fbbf24; box-shadow: 0 0 16px rgba(251,191,36,0.3); }
 
-        /* --- foto del candidato (feliz o triste según resultado) --- */
         .logo {
             width: 200px;
             height: 200px;
             border-radius: 8px;
-            flex-shrink: 0;   /* no se encoge aunque la pantalla sea chica */
+            flex-shrink: 0;
             overflow: hidden;
         }
         .logo img {
             width: 100%;
             height: 100%;
-            object-fit: cover;  /* recorta la imagen para que llene el espacio sin deformarse */
+            object-fit: cover;
         }
 
-        /* --- datos del candidato (nombre, partido, votos, %) --- */
         .card-info { text-align: left; }
         .name { font-size: 1.2rem; font-weight: 600; margin-bottom: 2px; }
         .party { color: #94a3b8; font-size: 0.78rem; margin-bottom: 10px; }
@@ -79,7 +84,6 @@
         .label { color: #64748b; font-size: 0.72rem; }
         .percent { color: #c4b5fd; margin-top: 4px; font-size: 1rem; }
 
-        /* === CAJA DE DIFERENCIA DE VOTOS (amarilla) === */
         .diff-box {
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #1e293b;
@@ -91,7 +95,6 @@
         .diff-label { font-size: 0.7rem; opacity: 0.8; }
         .diff-value { font-size: 1.4rem; font-weight: 700; }
 
-        /* === CAJA DEL GANADOR (verde si gana Keiko, rojo si gana Roberto) === */
         .winner-box {
             background: rgba(74, 222, 128, 0.15);
             border: 2px solid #4ade80;
@@ -108,17 +111,15 @@
             color: #f87171;
         }
 
-        /* === BARRA DE PROGRESO de porcentajes (rosa Keiko | azul Roberto) === */
         .progress { display: flex; height: 28px; border-radius: 5px; overflow: hidden; margin-bottom: 12px; }
         .bar1 { background: linear-gradient(90deg, #e91e63, #f06292); display: flex; align-items: center; justify-content: center; transition: width 0.5s; }
         .bar2 { background: linear-gradient(90deg, #1976d2, #42a5f5); display: flex; align-items: center; justify-content: center; transition: width 0.5s; }
         .bar span { font-weight: 600; font-size: 0.75rem; }
 
         .update-info { text-align: center; color: #64748b; font-size: 0.7rem; }
-        .countdown { color: #fbbf24; font-weight: 600; }  /* amarillo para la cuenta regresiva */
+        .countdown { color: #fbbf24; font-weight: 600; }
 
-        /* === INDICADOR DE CONEXIÓN (puntito verde/rojo) === */
-        .status { text-align: center; margin-top: 8px; }
+        .status { text-align: center; margin-top: 6px; }
         .status-dot {
             display: inline-block;
             width: 8px;
@@ -126,11 +127,10 @@
             border-radius: 50%;
             margin-right: 4px;
         }
-        .status-dot.online { background: #4ade80; }   /* verde = conectado */
-        .status-dot.offline { background: #ef4444; }  /* rojo = desconectado */
+        .status-dot.online { background: #4ade80; }
+        .status-dot.offline { background: #ef4444; }
         .status-text { color: #94a3b8; font-size: 0.72rem; }
 
-        /* === SPINNER DE CARGA (ruedita que gira mientras espera datos) === */
         .loading { text-align: center; padding: 20px; color: #64748b; }
         .spinner {
             display: inline-block;
@@ -138,12 +138,11 @@
             border: 2px solid #334155;
             border-top-color: #fbbf24;
             border-radius: 50%;
-            animation: spin 1s linear infinite;  /* gira sin parar */
+            animation: spin 1s linear infinite;
             margin-right: 10px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* === MENSAJE DE ERROR (cuando no hay conexión al servidor) === */
         .error { background: rgba(239,68,68,0.2); border: 1px solid #ef4444; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 15px; }
         .error button {
             background: #ef4444;
@@ -155,7 +154,6 @@
             margin-top: 10px;
         }
 
-        /* === LEYENDA FP / RP debajo de la barra === */
         .legend {
             display: flex;
             justify-content: center;
@@ -166,59 +164,175 @@
         }
         .legend-item { display: flex; align-items: center; gap: 4px; }
         .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .legend-dot.fp { background: #e91e63; }  /* rosado = Fuerza Popular */
-        .legend-dot.rp { background: #2196f3; }  /* azul = Renovación Popular */
+        .legend-dot.fp { background: #e91e63; }
+        .legend-dot.rp { background: #2196f3; }
 
-        /* === SECCIÓN YAPE: foto personal + QR + mensaje de apoyo === */
+        .social-row {
+            display: flex;
+            gap: 10px;
+        }
+        .social-stat {
+            flex: 1;
+            background: rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 12px 10px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .social-stat .icon { font-size: 1.4rem; }
+        .social-stat .num { font-size: 1.3rem; font-weight: 700; color: #fbbf24; }
+        .social-stat .lbl { font-size: 0.65rem; color: #64748b; display: block; }
+
+        .like-btn {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.08));
+            border: 1px solid rgba(239,68,68,0.4);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            user-select: none;
+        }
+        .like-btn:hover { background: rgba(239,68,68,0.3); transform: scale(1.03); }
+        .like-btn:active { transform: scale(0.95); }
+        .like-btn.liked { background: rgba(239,68,68,0.4); border-color: #ef4444; cursor: default; }
+        .like-btn .icon { font-size: 1.5rem; transition: transform 0.2s; }
+        .like-btn:active .icon { transform: scale(1.3); }
+        .like-btn .num { font-size: 1.1rem; font-weight: 700; color: #fca5a5; }
+
         .yape-box {
             background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(125, 42, 232, 0.4);  /* borde morado estilo Yape */
+            border: 1px solid rgba(125, 42, 232, 0.35);
             border-radius: 12px;
-            padding: 14px;
-            text-align: center;
+            padding: 16px;
+        }
+        .yape-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
         }
         .yape-photo {
-            width: 300px; height: 300px;
-            border-radius: 50%;         /* circular como foto de perfil */
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
             overflow: hidden;
-            border: 3px solid #c084fc;   /* borde morado */
-            margin: 0 auto 12px;
+            border: 3px solid #c084fc;
+            flex-shrink: 0;
         }
-        .yape-photo img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-        }
+        .yape-photo img { width: 100%; height: 100%; object-fit: cover; }
         .yape-qr {
-            width: 390px; height: 390px;
-            border-radius: 10px;
+            width: 160px;
+            height: 160px;
+            border-radius: 8px;
             overflow: hidden;
-            margin: 0 auto 12px;
+            flex-shrink: 0;
         }
-        .yape-qr img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-        }
-        .yape-text { line-height: 1.4; }
+        .yape-qr img { width: 100%; height: 100%; object-fit: cover; }
+        .yape-text { text-align: center; }
         .yape-text .yape-label {
-            color: #c084fc;          /* morado Yape */
+            color: #c084fc;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
         .yape-text .yape-msg {
-            color: #94a3b8;
-            font-size: 0.72rem;
+            color: #64748b;
+            font-size: 0.7rem;
             margin-top: 2px;
         }
 
-        /* === MÓVIL: todo se apila en una sola columna y se achica === */
+        .comments-panel {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 14px;
+        }
+        .comments-panel h3 {
+            font-size: 0.85rem;
+            color: #a78bfa;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .comment-form { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+        .comment-form input, .comment-form textarea {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            color: #e2e8f0;
+            padding: 8px 10px;
+            font-family: inherit;
+            font-size: 0.78rem;
+            resize: none;
+        }
+        .comment-form input::placeholder, .comment-form textarea::placeholder { color: #475569; }
+        .comment-form textarea { height: 60px; }
+        .comment-form button {
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 7px;
+            font-weight: 600;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .comment-form button:hover { opacity: 0.9; }
+        .comment-form button:disabled { opacity: 0.5; cursor: default; }
+        .comment-list {
+            max-height: 280px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .comment-list::-webkit-scrollbar { width: 4px; }
+        .comment-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+        .comment-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+        .comment-item .comment-name {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #a78bfa;
+        }
+        .comment-item .comment-date {
+            font-size: 0.62rem;
+            color: #475569;
+            margin-left: 6px;
+        }
+        .comment-item .comment-text {
+            font-size: 0.76rem;
+            color: #cbd5e1;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+        .no-comments {
+            text-align: center;
+            color: #475569;
+            font-size: 0.72rem;
+            padding: 14px 0;
+        }
+
         @media (max-width: 768px) {
             html, body { overflow: auto; height: auto; }
             body { padding: 8px; }
             .container { flex-direction: column; gap: 12px; }
-            .side-col { width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; }
-            .yape-box { display: flex; align-items: center; gap: 12px; text-align: left; }
-            .yape-photo { width: 60px; height: 60px; margin: 0; }
-            .yape-qr { width: 80px; height: 80px; margin: 0; }
+            .side-col { width: 100%; max-height: none; overflow-y: visible; }
+            .social-row { flex-direction: row; }
+            .yape-header { flex-wrap: wrap; justify-content: center; }
             .card { flex-direction: column; text-align: center; }
             .card-info { text-align: center; }
             .logo { width: 160px; height: 160px; margin: 0 auto 8px; }
@@ -227,31 +341,23 @@
     </style>
 </head>
 <body>
-    <!-- CONTENEDOR PRINCIPAL: 2 columnas (resultados a la izquierda, Yape a la derecha) -->
     <div class="container">
 
-        <!-- ====== COLUMNA IZQUIERDA: RESULTADOS ELECTORALES ====== -->
         <div class="main-col">
-        <h1>Elecciones Perú 2026</h1>
+        <h1>Elecciones Peru 2026</h1>
         <p class="subtitle">Segunda Vuelta - Fuente: ONPE</p>
         <p class="actas" id="actas">Actas contabilizadas: --%</p>
-        <p class="last-update" id="lastUpdateInfo">Última actualización: --</p>
+        <p class="last-update" id="lastUpdateInfo">Ultima actualizacion: --</p>
 
-        <!-- Aquí aparece el mensaje de error si el servidor no responde -->
         <div id="error"></div>
 
-        <!-- Spinner de carga: se muestra mientras se esperan los primeros datos -->
         <div class="loading" id="loading">
             <span class="spinner"></span>
             Conectando con servidor...
         </div>
 
-        <!-- CONTENIDO DE RESULTADOS: oculto hasta que lleguen los primeros datos -->
         <div id="content" style="display: none;">
-
-            <!-- Tarjetas de los 2 candidatos, cada una con foto + datos -->
             <div class="candidates">
-                <!-- Keiko Fujimori -->
                 <div class="card" id="card1">
                     <div class="logo"><img id="img1" src="Keiko%20triste.png?v=3" alt="Keiko"></div>
                     <div class="card-info">
@@ -262,12 +368,11 @@
                     <div class="percent" id="percent1">0%</div>
                     </div>
                 </div>
-                <!-- Roberto Sánchez -->
                 <div class="card" id="card2">
                     <div class="logo"><img id="img2" src="RS%20triste.png" alt="Roberto"></div>
                     <div class="card-info">
-                    <div class="name" id="name2">Roberto Sánchez</div>
-                    <div class="party" id="party2">Renovación Popular</div>
+                    <div class="name" id="name2">Roberto Sanchez</div>
+                    <div class="party" id="party2">Renovacion Popular</div>
                     <div class="votes" id="votes2">0</div>
                     <div class="label">votos</div>
                     <div class="percent" id="percent2">0%</div>
@@ -275,51 +380,67 @@
                 </div>
             </div>
 
-            <!-- Diferencia de votos entre candidatos -->
             <div class="diff-box">
                 <div class="diff-label">Diferencia</div>
                 <div class="diff-value" id="diff">0 votos</div>
             </div>
 
-            <!-- Quién va ganando + frase rotativa del pueblo -->
             <div class="winner-box" id="winnerBox">
                 <span id="winnerText">Ganador por ahora: ---</span>
             </div>
 
-            <!-- Barra visual de porcentajes (rosa Keiko | azul Roberto) -->
             <div class="progress">
                 <div class="bar1" id="bar1" style="width:50%"><span id="barText1">50%</span></div>
                 <div class="bar2" id="bar2" style="width:50%"><span id="barText2">50%</span></div>
             </div>
 
-            <!-- Leyenda de colores -->
             <div class="legend">
                 <div class="legend-item"><div class="legend-dot fp"></div> FP (Fuerza Popular)</div>
-                <div class="legend-item"><div class="legend-dot rp"></div> RP (Renovación Popular)</div>
+                <div class="legend-item"><div class="legend-dot rp"></div> RP (Renovacion Popular)</div>
             </div>
 
-            <!-- Hora de última actualización y cuenta regresiva -->
             <div class="update-info" style="margin-top: 12px;">
                 Actualizado: <span id="lastUpdate">-</span><br>
-                Próxima actualización: <span class="countdown" id="countdown">1:00</span>
+                Proxima actualizacion: <span class="countdown" id="countdown">1:00</span>
             </div>
         </div>
         </div>
 
-        <!-- ====== COLUMNA DERECHA: YAPE (apoyo/donación) ====== -->
         <div class="side-col">
+        <div class="social-row">
+            <div class="social-stat">
+                <span class="icon">&#128065;</span>
+                <div><span class="num" id="viewCount">0</span><span class="lbl">visitas</span></div>
+            </div>
+            <div class="like-btn" id="likeBtn" onclick="handleLike()">
+                <span class="icon">&#128077;</span>
+                <span class="num" id="likeCount">0</span>
+            </div>
+        </div>
+
         <div class="yape-box">
-            <!-- Foto personal circular -->
-            <div class="yape-photo"><img src="yo.jpeg" alt="Foto"></div>
-            <!-- Código QR de Yape para escanear y donar -->
-            <div class="yape-qr"><img src="Yape.jpeg" alt="Yape QR"></div>
+            <div class="yape-header">
+                <div class="yape-photo"><img src="yo.jpeg" alt="Foto"></div>
+                <div class="yape-qr"><img src="Yape.jpeg" alt="Yape QR"></div>
+            </div>
             <div class="yape-text">
                 <div class="yape-label">Apoyo al talento de Claro</div>
                 <div class="yape-msg">Yapea tu apoyo y contribuye con el monitoreo electoral en tiempo real</div>
             </div>
         </div>
 
-        <!-- Puntito verde/rojo de conexión al servidor -->
+        <div class="comments-panel">
+            <h3>&#128172; Comentarios</h3>
+            <div class="comment-form">
+                <input type="text" id="commentName" placeholder="Tu nombre (opcional)" maxlength="40">
+                <textarea id="commentText" placeholder="Escribe tu comentario..." maxlength="500"></textarea>
+                <button id="commentBtn" onclick="submitComment()">Enviar</button>
+            </div>
+            <div class="comment-list" id="commentList">
+                <div class="no-comments">Se el primero en comentar</div>
+            </div>
+        </div>
+
         <div class="status" id="status">
             <span class="status-dot offline"></span>
             <span class="status-text">Conectando...</span>
@@ -328,171 +449,230 @@
     </div>
 
     <script>
-        // ====== CONFIGURACIÓN ======
-        // URL del servidor que tiene los datos de la ONPE (cambia si reinicias cloudflared)
         const API_URL = 'https://fruits-emily-jar-nuke.trycloudflare.com/api';
 
-        // ====== VARIABLES GLOBALES ======
-        let countdown = 60;      // segundos para el próximo refresco automático
-        let timer;               // guarda el identificador del setInterval
-        let phraseIdx1 = 0;      // índice para rotar frases de Keiko
-        let phraseIdx2 = 0;      // índice para rotar frases de Roberto
+        let countdown = 60;
+        let timer;
+        let phraseIdx1 = 0;
+        let phraseIdx2 = 0;
+        let likedSession = false;
 
-        // ====== FRASES ROTATIVAS: cambian cada minuto según quién gana ======
         const frasesKeiko = [
-            "¡La tercera fue la vencida!",
+            "La tercera fue la vencida!",
             "El fujimorismo vuelve a Palacio",
             "El 50% celebra, el otro 50% saca pasaporte",
             "Las cacerolas siguen guardadas... por ahora",
-            "Fuerza Popular: 'esta vez sí'",
-            "¿Y ahora quién podrá defendernos?",
+            "Fuerza Popular: 'esta vez si'",
+            "Y ahora quien podra defendernos?",
             "Keiko presidenta, memes asegurados",
-            "Con Keiko el freezer está prohibido"
+            "Con Keiko el freezer esta prohibido"
         ];
 
         const frasesRoberto = [
-            "¡Ganó el profe! Vacaciones para todos",
-            "De anónimo a presidente en 3 meses",
-            "Perú dijo: probemos algo diferente",
+            "Gano el profe! Vacaciones para todos",
+            "De anonimo a presidente en 3 meses",
+            "Peru dijo: probemos algo diferente",
             "La izquierda respira por primera vez",
-            "¿Roberto qué? — Medio Perú en Google",
-            "El cambio llegó... sin avisar",
-            "Tarea para el Perú: sobrevivir 5 años",
-            "Juntos por el Perú... o lo que quede"
+            "Roberto que? - Medio Peru en Google",
+            "El cambio llego... sin avisar",
+            "Tarea para el Peru: sobrevivir 5 anos",
+            "Juntos por el Peru... o lo que quede"
         ];
 
-        // ====== FUNCIONES AUXILIARES ======
-
-        // Convierte un número a formato peruano (ej: 1000000 -> "1,000,000")
         function formatNum(n) {
             return new Intl.NumberFormat('es-PE').format(n);
         }
 
-        // Muestra un mensaje de error rojo con botón de reintentar
         function showError(msg) {
             document.getElementById('error').innerHTML =
-                `<div class="error">${msg}<button onclick="fetchData()">Reintentar</button></div>`;
+                '<div class="error">' + msg + '<button onclick="fetchData()">Reintentar</button></div>';
         }
 
-        // ====== ACTUALIZA TODA LA INTERFAZ con los datos recibidos del servidor ======
         function updateUI(data) {
-            // --- calcular totales y porcentajes ---
             const total = data.candidate1.votes + data.candidate2.votes;
             const p1 = total > 0 ? ((data.candidate1.votes / total) * 100).toFixed(2) : 0;
             const p2 = total > 0 ? ((data.candidate2.votes / total) * 100).toFixed(2) : 0;
             const diff = Math.abs(data.candidate1.votes - data.candidate2.votes);
 
-            // --- actas contabilizadas ---
-            document.getElementById('actas').textContent = `Actas contabilizadas: ${data.actasContabilizadas}%`;
+            document.getElementById('actas').textContent = 'Actas contabilizadas: ' + data.actasContabilizadas + '%';
 
-            // --- datos de Keiko (candidato 1) ---
             document.getElementById('name1').textContent = data.candidate1.name;
             document.getElementById('party1').textContent = data.candidate1.party;
             document.getElementById('votes1').textContent = formatNum(data.candidate1.votes);
             document.getElementById('percent1').textContent = p1 + '%';
 
-            // --- datos de Roberto (candidato 2) ---
             document.getElementById('name2').textContent = data.candidate2.name;
             document.getElementById('party2').textContent = data.candidate2.party;
             document.getElementById('votes2').textContent = formatNum(data.candidate2.votes);
             document.getElementById('percent2').textContent = p2 + '%';
 
-            // --- diferencia de votos ---
             document.getElementById('diff').textContent = formatNum(diff) + ' votos';
 
-            // --- barra de progreso visual ---
             document.getElementById('bar1').style.width = p1 + '%';
             document.getElementById('barText1').textContent = p1 + '%';
             document.getElementById('bar2').style.width = p2 + '%';
             document.getElementById('barText2').textContent = p2 + '%';
 
-            // --- quién gana: cambia foto (feliz/triste), frase y color de la caja ---
             if (data.candidate1.votes > data.candidate2.votes) {
-                // KEIko gana
                 document.getElementById('card1').classList.add('winner');
                 document.getElementById('card2').classList.remove('winner');
                 document.getElementById('winnerBox').classList.remove('losing');
-                const f = frasesKeiko[phraseIdx1 % frasesKeiko.length];
-                document.getElementById('winnerText').textContent = `Ganador por ahora: ${data.candidate1.name} — "${f}"`;
+                var f = frasesKeiko[phraseIdx1 % frasesKeiko.length];
+                document.getElementById('winnerText').textContent = 'Ganador por ahora: ' + data.candidate1.name + ' - "' + f + '"';
                 phraseIdx1++;
-                document.getElementById('img1').src = 'Keiko%20feliz.png?v=3';   // Keiko feliz
-                document.getElementById('img2').src = 'RS%20triste.png?v=3';     // Roberto triste
+                document.getElementById('img1').src = 'Keiko%20feliz.png?v=3';
+                document.getElementById('img2').src = 'RS%20triste.png?v=3';
             } else {
-                // ROBERTO gana
                 document.getElementById('card2').classList.add('winner');
                 document.getElementById('card1').classList.remove('winner');
                 document.getElementById('winnerBox').classList.add('losing');
-                const f = frasesRoberto[phraseIdx2 % frasesRoberto.length];
-                document.getElementById('winnerText').textContent = `Ganador por ahora: ${data.candidate2.name} — "${f}"`;
+                var f = frasesRoberto[phraseIdx2 % frasesRoberto.length];
+                document.getElementById('winnerText').textContent = 'Ganador por ahora: ' + data.candidate2.name + ' - "' + f + '"';
                 phraseIdx2++;
-                document.getElementById('img1').src = 'Keiko%20triste.png?v=3';  // Keiko triste
-                document.getElementById('img2').src = 'RS%20feliz.png?v=3';      // Roberto feliz
+                document.getElementById('img1').src = 'Keiko%20triste.png?v=3';
+                document.getElementById('img2').src = 'RS%20feliz.png?v=3';
             }
 
-            // --- fecha y hora de la última actualización ---
-            const updateTime = new Date(data.timestamp);
-            const formattedDate = updateTime.toLocaleDateString('es-PE', {
-                day: '2-digit', month: '2-digit', year: 'numeric'
-            });
-            const formattedTime = updateTime.toLocaleTimeString('es-PE', {
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
-            document.getElementById('lastUpdateInfo').textContent = `Última actualización: ${formattedDate} ${formattedTime}`;
+            var updateTime = new Date(data.timestamp);
+            var formattedDate = updateTime.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            var formattedTime = updateTime.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('lastUpdateInfo').textContent = 'Ultima actualizacion: ' + formattedDate + ' ' + formattedTime;
             document.getElementById('lastUpdate').textContent = formattedTime;
 
-            // --- mostrar contenido y ocultar spinner de carga ---
             document.getElementById('loading').style.display = 'none';
             document.getElementById('content').style.display = 'block';
             document.getElementById('error').innerHTML = '';
             startTimer();
         }
 
-        // ====== LLAMA AL SERVIDOR para obtener los datos de la ONPE ======
         async function fetchData() {
             try {
-                const response = await fetch(`${API_URL}/results`);
+                var response = await fetch(API_URL + '/results');
                 if (!response.ok) throw new Error('Error del servidor');
-                const data = await response.json();
+                var data = await response.json();
                 updateUI(data);
-
-                // Puntito verde: conectado
                 document.getElementById('status').innerHTML =
                     '<span class="status-dot online"></span><span class="status-text">Conectado - Actualizando cada 1 min</span>';
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('loading').style.display = 'none';
-                showError('No se pudo conectar al servidor. Asegúrate de ejecutar: <code>npm start</code>');
-                // Puntito rojo: desconectado
+                showError('No se pudo conectar al servidor. Asegurate de ejecutar: <code>npm start</code>');
                 document.getElementById('status').innerHTML =
                     '<span class="status-dot offline"></span><span class="status-text">Desconectado</span>';
             }
         }
 
-        // ====== TEMPORIZADOR: cuenta regresiva de 60 segundos, luego refresca ======
         function startTimer() {
-            clearInterval(timer);           // reinicia el timer anterior
-            countdown = 60;                 // vuelve a 60 segundos
+            clearInterval(timer);
+            countdown = 60;
             updateCountdown();
-            timer = setInterval(() => {
+            timer = setInterval(function() {
                 countdown--;
                 updateCountdown();
                 if (countdown <= 0) {
-                    countdown = 60;         // reinicia la cuenta
-                    fetchData();            // pide nuevos datos al servidor
+                    countdown = 60;
+                    fetchData();
                 }
-            }, 1000);  // cada 1 segundo
+            }, 1000);
         }
 
-        // Muestra el contador en formato m:ss (ej: "0:45")
         function updateCountdown() {
             if (countdown < 0) countdown = 0;
             if (countdown > 60) countdown = 60;
-            const m = Math.floor(countdown / 60);
-            const s = countdown % 60;
-            document.getElementById('countdown').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+            var m = Math.floor(countdown / 60);
+            var s = countdown % 60;
+            document.getElementById('countdown').textContent = m + ':' + (s < 10 ? '0' : '') + s;
         }
 
-        // ====== ARRANQUE: primera carga y primer timer ======
+        async function loadSocial() {
+            try {
+                var r = await fetch(API_URL + '/social');
+                if (!r.ok) return;
+                var d = await r.json();
+                document.getElementById('viewCount').textContent = formatNum(d.views || 0);
+                document.getElementById('likeCount').textContent = formatNum(d.likes || 0);
+                renderComments(d.comments || []);
+            } catch (e) { console.error('Social load error:', e); }
+        }
+
+        async function registerView() {
+            try {
+                var r = await fetch(API_URL + '/social/view', { method: 'POST' });
+                if (r.ok) {
+                    var d = await r.json();
+                    document.getElementById('viewCount').textContent = formatNum(d.views);
+                }
+            } catch (e) { console.error('View register error:', e); }
+        }
+
+        async function handleLike() {
+            if (likedSession) return;
+            likedSession = true;
+            var btn = document.getElementById('likeBtn');
+            btn.classList.add('liked');
+            try {
+                var r = await fetch(API_URL + '/social/like', { method: 'POST' });
+                if (r.ok) {
+                    var d = await r.json();
+                    document.getElementById('likeCount').textContent = formatNum(d.likes);
+                }
+            } catch (e) { console.error('Like error:', e); }
+        }
+
+        function renderComments(comments) {
+            var list = document.getElementById('commentList');
+            if (!comments || comments.length === 0) {
+                list.innerHTML = '<div class="no-comments">Se el primero en comentar</div>';
+                return;
+            }
+            var html = '';
+            for (var i = comments.length - 1; i >= 0; i--) {
+                var c = comments[i];
+                var d = new Date(c.date);
+                var dateStr = d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
+                    d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+                var safeName = c.name.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                var safeText = c.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                html += '<div class="comment-item">' +
+                    '<span class="comment-name">' + safeName + '</span>' +
+                    '<span class="comment-date">' + dateStr + '</span>' +
+                    '<div class="comment-text">' + safeText + '</div>' +
+                    '</div>';
+            }
+            list.innerHTML = html;
+        }
+
+        async function submitComment() {
+            var nameInput = document.getElementById('commentName');
+            var textInput = document.getElementById('commentText');
+            var btn = document.getElementById('commentBtn');
+            var text = textInput.value.trim();
+            if (!text) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+            try {
+                var r = await fetch(API_URL + '/social/comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: nameInput.value.trim(), text: text })
+                });
+                if (r.ok) {
+                    textInput.value = '';
+                    var d = await r.json();
+                    var fullR = await fetch(API_URL + '/social');
+                    if (fullR.ok) {
+                        var fullD = await fullR.json();
+                        renderComments(fullD.comments || []);
+                    }
+                }
+            } catch (e) { console.error('Comment error:', e); }
+            btn.disabled = false;
+            btn.textContent = 'Enviar';
+        }
+
+        loadSocial();
+        registerView();
         fetchData();
         startTimer();
     </script>

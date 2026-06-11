@@ -1,13 +1,16 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(express.json());
+
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (req.method === 'OPTIONS') return res.sendStatus(200);
     next();
@@ -179,6 +182,62 @@ app.get('/api/refresh', async (req, res) => {
     } else {
         res.status(500).json({ error: 'Error al obtener datos' });
     }
+});
+
+const SOCIAL_FILE = path.join(__dirname, 'social-data.json');
+
+function loadSocial() {
+    try {
+        if (fs.existsSync(SOCIAL_FILE)) {
+            return JSON.parse(fs.readFileSync(SOCIAL_FILE, 'utf8'));
+        }
+    } catch (e) { console.error('Error loading social data:', e.message); }
+    return { views: 0, likes: 0, comments: [] };
+}
+
+function saveSocial(data) {
+    try {
+        fs.writeFileSync(SOCIAL_FILE, JSON.stringify(data, null, 2));
+    } catch (e) { console.error('Error saving social data:', e.message); }
+}
+
+let social = loadSocial();
+
+app.get('/api/social', (req, res) => {
+    social = loadSocial();
+    res.json(social);
+});
+
+app.post('/api/social/view', (req, res) => {
+    social = loadSocial();
+    social.views = (social.views || 0) + 1;
+    saveSocial(social);
+    res.json({ views: social.views });
+});
+
+app.post('/api/social/like', (req, res) => {
+    social = loadSocial();
+    social.likes = (social.likes || 0) + 1;
+    saveSocial(social);
+    res.json({ likes: social.likes });
+});
+
+app.post('/api/social/comment', (req, res) => {
+    const { name, text } = req.body;
+    if (!text || text.trim().length === 0) {
+        return res.status(400).json({ error: 'El comentario no puede estar vacio' });
+    }
+    social = loadSocial();
+    const comment = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        name: (name || 'Anonimo').trim(),
+        text: text.trim(),
+        date: new Date().toISOString()
+    };
+    social.comments.push(comment);
+    if (social.comments.length > 200) social.comments = social.comments.slice(-200);
+    saveSocial(social);
+    res.json(comment);
 });
 
 app.listen(PORT, () => {
