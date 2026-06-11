@@ -35,34 +35,40 @@ const CANDIDATES = {
     }
 };
 
-async function fetchONPEData() {
-    if (isFetching) {
-        console.log('Ya hay una solicitud en curso, esperando...');
-        return cachedData;
+async function scrapeWithPuppeteer() {
+    let browser = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            console.log(`Chrome intento ${attempt}/3...`);
+            browser = await puppeteer.launch({
+                headless: true,
+                args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+            });
+            break;
+        } catch (e) {
+            console.error(`Fallo intento ${attempt}: ${e.message.substring(0, 80)}`);
+            if (attempt < 3) await new Promise(r => setTimeout(r, 5000));
+            else throw e;
+        }
     }
 
-    isFetching = true;
-    let browser = null;
-
     try {
-        console.log('Iniciando Puppeteer...');
-        browser = await puppeteer.launch({
-            headless: 'new',
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-        });
-
         const page = await browser.newPage();
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
         await page.setDefaultNavigationTimeout(45000);
 
         console.log('Navegando a ONPE...');
-        await page.goto('https://resultadosegundavuelta.onpe.gob.pe/main/resumen', {
-            waitUntil: 'networkidle2',
-            timeout: 45000
-        });
+        try {
+            await page.goto('https://resultadosegundavuelta.onpe.gob.pe/main/resumen', {
+                waitUntil: 'networkidle2',
+                timeout: 45000
+            });
+        } catch (e) {
+            console.log('Nav warning:', e.message.substring(0, 80));
+        }
 
-        console.log('Esperando datos...');
-        await new Promise(resolve => setTimeout(resolve, 8000));
+        console.log('Esperando renderizado...');
+        await new Promise(r => setTimeout(r, 8000));
 
         console.log('Extrayendo datos...');
         const data = await page.evaluate(() => {
@@ -111,32 +117,42 @@ async function fetchONPEData() {
         await browser.close();
         browser = null;
 
-        console.log('Datos extraídos:', data);
+        console.log('Extraido:', JSON.stringify(data));
 
         if (data.keikoVotes > 0 || data.robertoVotes > 0) {
-            cachedData = {
-                candidate1: {
-                    ...CANDIDATES.candidate1,
-                    votes: data.keikoVotes || 0
-                },
-                candidate2: {
-                    ...CANDIDATES.candidate2,
-                    votes: data.robertoVotes || 0
-                },
+            return {
+                candidate1: { ...CANDIDATES.candidate1, votes: data.keikoVotes || 0 },
+                candidate2: { ...CANDIDATES.candidate2, votes: data.robertoVotes || 0 },
                 actasContabilizadas: data.actasPorcentaje || 0,
                 timestamp: new Date().toISOString()
             };
-            lastFetch = new Date();
-            console.log('Cache actualizado:', cachedData);
-            return cachedData;
-        } else {
-            console.log('No se encontraron votos');
-            return null;
         }
 
+        console.log('Sin votos encontrados');
+        return null;
+    } finally {
+        if (browser) try { await browser.close(); } catch (_) {}
+    }
+}
+
+async function fetchONPEData() {
+    if (isFetching) return cachedData;
+    isFetching = true;
+
+    try {
+        const result = await Promise.race([
+            scrapeWithPuppeteer(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout 120s')), 120000))
+        ]);
+
+        if (result) {
+            cachedData = result;
+            lastFetch = new Date();
+            console.log('Cache actualizado');
+        }
+        return result;
     } catch (error) {
-        console.error('Error fetching ONPE data:', error.message);
-        if (browser) await browser.close().catch(() => {});
+        console.error('Error:', error.message);
         return null;
     } finally {
         isFetching = false;
@@ -144,44 +160,22 @@ async function fetchONPEData() {
 }
 
 app.get('/api/results', async (req, res) => {
-    console.log('Solicitud a /api/results');
-
-    if (cachedData) {
-        const age = lastFetch ? (Date.now() - lastFetch.getTime()) / 1000 : 0;
-        console.log(`Sirviendo datos en cache (edad: ${age.toFixed(0)}s)`);
-        return res.json(cachedData);
-    }
-
-    console.log('No hay cache, obteniendo datos...');
+    if (cachedData) return res.json(cachedData);
     const data = await fetchONPEData();
-
-    if (data) {
-        res.json(data);
-    } else {
-        res.status(500).json({ error: 'No se pudieron obtener los datos de ONPE' });
-    }
+    if (data) res.json(data);
+    else res.status(500).json({ error: 'No se pudieron obtener los datos de ONPE' });
 });
 
-app.get('/api/candidates', (req, res) => {
-    res.json(CANDIDATES);
-});
+app.get('/api/candidates', (req, res) => res.json(CANDIDATES));
 
 app.get('/api/status', (req, res) => {
-    res.json({
-        lastFetch: lastFetch ? lastFetch.toISOString() : null,
-        hasData: cachedData !== null,
-        isFetching: isFetching
-    });
+    res.json({ lastFetch: lastFetch ? lastFetch.toISOString() : null, hasData: cachedData !== null, isFetching });
 });
 
 app.get('/api/refresh', async (req, res) => {
-    console.log('Solicitud de refresh manual');
     const data = await fetchONPEData();
-    if (data) {
-        res.json(data);
-    } else {
-        res.status(500).json({ error: 'Error al obtener datos' });
-    }
+    if (data) res.json(data);
+    else res.status(500).json({ error: 'Error al obtener datos' });
 });
 
 const db = new Firestore();
@@ -191,20 +185,16 @@ async function loadSocial() {
     try {
         const doc = await db.doc(SOCIAL_DOC).get();
         if (doc.exists) return doc.data();
-    } catch (e) { console.error('Error loading social data:', e.message); }
+    } catch (e) { console.error('Error loading social:', e.message); }
     return { views: 0, likes: 0, comments: [] };
 }
 
 async function saveSocial(data) {
-    try {
-        await db.doc(SOCIAL_DOC).set(data);
-    } catch (e) { console.error('Error saving social data:', e.message); }
+    try { await db.doc(SOCIAL_DOC).set(data); }
+    catch (e) { console.error('Error saving social:', e.message); }
 }
 
-app.get('/api/social', async (req, res) => {
-    const data = await loadSocial();
-    res.json(data);
-});
+app.get('/api/social', async (req, res) => res.json(await loadSocial()));
 
 app.post('/api/social/view', async (req, res) => {
     try {
@@ -234,9 +224,7 @@ app.post('/api/social/like', async (req, res) => {
 
 app.post('/api/social/comment', async (req, res) => {
     const { name, text } = req.body;
-    if (!text || text.trim().length === 0) {
-        return res.status(400).json({ error: 'El comentario no puede estar vacio' });
-    }
+    if (!text || text.trim().length === 0) return res.status(400).json({ error: 'El comentario no puede estar vacio' });
     const comment = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
         name: (name || 'Anonimo').trim(),
@@ -244,9 +232,7 @@ app.post('/api/social/comment', async (req, res) => {
         date: new Date().toISOString()
     };
     try {
-        await db.doc(SOCIAL_DOC).update({
-            comments: db.FieldValue.arrayUnion(comment)
-        });
+        await db.doc(SOCIAL_DOC).update({ comments: db.FieldValue.arrayUnion(comment) });
         const doc = await db.doc(SOCIAL_DOC).get();
         let comments = doc.data()?.comments || [];
         if (comments.length > 200) {
@@ -264,34 +250,15 @@ app.post('/api/social/comment', async (req, res) => {
 });
 
 app.listen(PORT, async () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
-
+    console.log(`Servidor en http://localhost:${PORT}`);
     try {
-        const socialDoc = await db.doc(SOCIAL_DOC).get();
-        if (!socialDoc.exists) {
-            await db.doc(SOCIAL_DOC).set({ views: 0, likes: 0, comments: [] });
-            console.log('Documento social creado en Firestore');
-        }
-        const existingData = socialDoc.exists ? socialDoc.data() : { views: 0, likes: 0, comments: [] };
-        console.log(`Social data: ${existingData.views} views, ${existingData.likes} likes, ${(existingData.comments || []).length} comments`);
-    } catch (e) {
-        console.error('Error inicializando Firestore:', e.message);
-    }
+        const doc = await db.doc(SOCIAL_DOC).get();
+        if (!doc.exists) await db.doc(SOCIAL_DOC).set({ views: 0, likes: 0, comments: [] });
+        const d = doc.exists ? doc.data() : { views: 0, likes: 0, comments: [] };
+        console.log(`Social: ${d.views} views, ${d.likes} likes`);
+    } catch (e) { console.error('Firestore init:', e.message); }
 
-    console.log('Iniciando captura de datos en background...');
-
-    setTimeout(() => {
-        fetchONPEData().then(data => {
-            if (data) {
-                console.log('Datos iniciales obtenidos exitosamente');
-            } else {
-                console.log('No se pudieron obtener datos iniciales');
-            }
-        });
-    }, 1000);
+    setTimeout(() => fetchONPEData().then(d => console.log(d ? 'Datos OK' : 'Sin datos')), 1000);
 });
 
-setInterval(() => {
-    console.log('Actualización programada...');
-    fetchONPEData();
-}, 60000);
+setInterval(() => fetchONPEData(), 60000);
