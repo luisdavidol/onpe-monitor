@@ -67,3 +67,7 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Local dev files (not needed for production)
+social-data.json
+health-check.ps1

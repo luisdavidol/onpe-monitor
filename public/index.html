@@ -557,7 +557,7 @@
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('loading').style.display = 'none';
-                showError('No se pudo conectar al servidor. Asegurate de ejecutar: <code>npm start</code>');
+                showError('No se pudo conectar al servidor. Intenta de nuevo mas tarde.');
                 document.getElementById('status').innerHTML =
                     '<span class="status-dot offline"></span><span class="status-text">Desconectado</span>';
             }

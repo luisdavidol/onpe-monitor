@@ -6,5 +6,6 @@ firebase.json
 .firebase
 .github
 *.md
-health-check.ps1
+README.md
 social-data.json
+health-check.ps1
