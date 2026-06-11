@@ -453,6 +453,7 @@
 
         let countdown = 60;
         let timer;
+        let socialTimer;
         let phraseIdx1 = 0;
         let phraseIdx2 = 0;
         let likedSession = false;
@@ -584,7 +585,7 @@
             document.getElementById('countdown').textContent = m + ':' + (s < 10 ? '0' : '') + s;
         }
 
-        async function loadSocial() {
+        async function refreshSocial() {
             try {
                 var r = await fetch(API_URL + '/social');
                 if (!r.ok) return;
@@ -592,7 +593,12 @@
                 document.getElementById('viewCount').textContent = formatNum(d.views || 0);
                 document.getElementById('likeCount').textContent = formatNum(d.likes || 0);
                 renderComments(d.comments || []);
-            } catch (e) { console.error('Social load error:', e); }
+            } catch (e) { console.error('Social refresh error:', e); }
+        }
+
+        function startSocialPolling() {
+            refreshSocial();
+            socialTimer = setInterval(refreshSocial, 5000);
         }
 
         async function registerView() {
@@ -659,19 +665,14 @@
                 });
                 if (r.ok) {
                     textInput.value = '';
-                    var d = await r.json();
-                    var fullR = await fetch(API_URL + '/social');
-                    if (fullR.ok) {
-                        var fullD = await fullR.json();
-                        renderComments(fullD.comments || []);
-                    }
+                    refreshSocial();
                 }
             } catch (e) { console.error('Comment error:', e); }
             btn.disabled = false;
             btn.textContent = 'Enviar';
         }
 
-        loadSocial();
+        startSocialPolling();
         registerView();
         fetchData();
         startTimer();
