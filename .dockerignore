@@ -1,0 +1,10 @@
+node_modules
+.git
+.gitignore
+firebase.json
+.firebaserc
+.firebase
+.github
+*.md
+health-check.ps1
+social-data.json

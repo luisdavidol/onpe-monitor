@@ -1,7 +1,7 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
 const path = require('path');
-const fs = require('fs');
+const {Firestore} = require('@google-cloud/firestore');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -184,64 +184,100 @@ app.get('/api/refresh', async (req, res) => {
     }
 });
 
-const SOCIAL_FILE = path.join(__dirname, 'social-data.json');
+const db = new Firestore();
+const SOCIAL_DOC = 'social/stats';
 
-function loadSocial() {
+async function loadSocial() {
     try {
-        if (fs.existsSync(SOCIAL_FILE)) {
-            return JSON.parse(fs.readFileSync(SOCIAL_FILE, 'utf8'));
-        }
+        const doc = await db.doc(SOCIAL_DOC).get();
+        if (doc.exists) return doc.data();
     } catch (e) { console.error('Error loading social data:', e.message); }
     return { views: 0, likes: 0, comments: [] };
 }
 
-function saveSocial(data) {
+async function saveSocial(data) {
     try {
-        fs.writeFileSync(SOCIAL_FILE, JSON.stringify(data, null, 2));
+        await db.doc(SOCIAL_DOC).set(data);
     } catch (e) { console.error('Error saving social data:', e.message); }
 }
 
-let social = loadSocial();
-
-app.get('/api/social', (req, res) => {
-    social = loadSocial();
-    res.json(social);
+app.get('/api/social', async (req, res) => {
+    const data = await loadSocial();
+    res.json(data);
 });
 
-app.post('/api/social/view', (req, res) => {
-    social = loadSocial();
-    social.views = (social.views || 0) + 1;
-    saveSocial(social);
-    res.json({ views: social.views });
+app.post('/api/social/view', async (req, res) => {
+    try {
+        await db.doc(SOCIAL_DOC).update({ views: db.FieldValue.increment(1) });
+        const doc = await db.doc(SOCIAL_DOC).get();
+        res.json({ views: doc.data()?.views || 0 });
+    } catch (e) {
+        const data = await loadSocial();
+        data.views = (data.views || 0) + 1;
+        await saveSocial(data);
+        res.json({ views: data.views });
+    }
 });
 
-app.post('/api/social/like', (req, res) => {
-    social = loadSocial();
-    social.likes = (social.likes || 0) + 1;
-    saveSocial(social);
-    res.json({ likes: social.likes });
+app.post('/api/social/like', async (req, res) => {
+    try {
+        await db.doc(SOCIAL_DOC).update({ likes: db.FieldValue.increment(1) });
+        const doc = await db.doc(SOCIAL_DOC).get();
+        res.json({ likes: doc.data()?.likes || 0 });
+    } catch (e) {
+        const data = await loadSocial();
+        data.likes = (data.likes || 0) + 1;
+        await saveSocial(data);
+        res.json({ likes: data.likes });
+    }
 });
 
-app.post('/api/social/comment', (req, res) => {
+app.post('/api/social/comment', async (req, res) => {
     const { name, text } = req.body;
     if (!text || text.trim().length === 0) {
         return res.status(400).json({ error: 'El comentario no puede estar vacio' });
     }
-    social = loadSocial();
     const comment = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
         name: (name || 'Anonimo').trim(),
         text: text.trim(),
         date: new Date().toISOString()
     };
-    social.comments.push(comment);
-    if (social.comments.length > 200) social.comments = social.comments.slice(-200);
-    saveSocial(social);
-    res.json(comment);
+    try {
+        await db.doc(SOCIAL_DOC).update({
+            comments: db.FieldValue.arrayUnion(comment)
+        });
+        const doc = await db.doc(SOCIAL_DOC).get();
+        let comments = doc.data()?.comments || [];
+        if (comments.length > 200) {
+            comments = comments.slice(-200);
+            await db.doc(SOCIAL_DOC).update({ comments });
+        }
+        res.json(comment);
+    } catch (e) {
+        const data = await loadSocial();
+        data.comments.push(comment);
+        if (data.comments.length > 200) data.comments = data.comments.slice(-200);
+        await saveSocial(data);
+        res.json(comment);
+    }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
+
+    try {
+        const socialDoc = await db.doc(SOCIAL_DOC).get();
+        if (!socialDoc.exists) {
+            await db.doc(SOCIAL_DOC).set({ views: 0, likes: 0, comments: [] });
+            console.log('Documento social creado en Firestore');
+        }
+        const existingData = socialDoc.exists ? socialDoc.data() : { views: 0, likes: 0, comments: [] };
+        console.log(`Social data: ${existingData.views} views, ${existingData.likes} likes, ${(existingData.comments || []).length} comments`);
+    } catch (e) {
+        console.error('Error inicializando Firestore:', e.message);
+    }
+
     console.log('Iniciando captura de datos en background...');
 
     setTimeout(() => {
