@@ -463,7 +463,7 @@
 
             <div class="update-info" style="margin-top: 12px;">
                 Actualizado: <span id="lastUpdate">-</span><br>
-                Proxima actualizacion: <span class="countdown" id="countdown">1:00</span>
+                Proxima actualizacion: <span class="countdown" id="countdown">0:20</span>
             </div>
         </div>
         </div>
@@ -513,7 +513,7 @@
     <script>
         const API_URL = 'https://onpe-backend-656880564600.us-central1.run.app/api';
 
-        let countdown = 60;
+        let countdown = 20;
         let timer;
         let socialTimer;
         let phraseIdx1 = 0;
@@ -673,13 +673,13 @@
 
         function startTimer() {
             clearInterval(timer);
-            countdown = 60;
+            countdown = 20;
             updateCountdown();
             timer = setInterval(function() {
                 countdown--;
                 updateCountdown();
                 if (countdown <= 0) {
-                    countdown = 60;
+                    countdown = 20;
                     fetchData();
                 }
             }, 1000);
@@ -687,7 +687,7 @@
 
         function updateCountdown() {
             if (countdown < 0) countdown = 0;
-            if (countdown > 60) countdown = 60;
+            if (countdown > 20) countdown = 20;
             var m = Math.floor(countdown / 60);
             var s = countdown % 60;
             document.getElementById('countdown').textContent = m + ':' + (s < 10 ? '0' : '') + s;

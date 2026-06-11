@@ -323,4 +323,4 @@ app.listen(PORT, async () => {
     setTimeout(() => fetchONPEData().then(d => console.log(d ? 'Datos OK' : 'Sin datos')), 1000);
 });
 
-setInterval(() => fetchONPEData(), 60000);
+setInterval(() => fetchONPEData(), 20000);
