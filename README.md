@@ -18,7 +18,7 @@ Monitoreo en tiempo real de los resultados de la **Segunda Vuelta Electoral 2026
 | Backend / Scraping | Node.js 20, Express, Puppeteer + Chromium | **Google Cloud Run** |
 | Base de Datos | **Firestore** (Firebase) | Google Cloud |
 | Frontend | HTML5, CSS3, Vanilla JS (SPA) | **Firebase Hosting** |
-| CI/CD | Cloud Build (deploy backend) + GitHub Actions (deploy frontend) | Google Cloud / GitHub |
+| CI/CD | GitHub Actions (deploy condicional de frontend y backend via Cloud Build) | GitHub / Google Cloud |
 
 ---
 
