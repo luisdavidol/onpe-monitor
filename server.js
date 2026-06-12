@@ -21,6 +21,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 let cachedData = null;
 let lastFetch = null;
 let isFetching = false;
+let fetchStartTime = null;
 
 const CANDIDATES = {
     candidate1: {
@@ -65,7 +66,7 @@ async function scrapeWithPuppeteer() {
             });
         } catch (e) { console.log('Nav warning:', e.message.substring(0, 80)); }
 
-        await new Promise(r => setTimeout(r, 8000));
+        await new Promise(r => setTimeout(r, 5000));
 
         const resumen = await page.evaluate(() => {
             const text = document.body.innerText;
@@ -104,7 +105,7 @@ async function scrapeWithPuppeteer() {
             });
         } catch (e) { console.log('Nav warning:', e.message.substring(0, 80)); }
 
-        await new Promise(r => setTimeout(r, 8000));
+        await new Promise(r => setTimeout(r, 5000));
 
         const actas = await page.evaluate(() => {
             const text = document.body.innerText;
@@ -198,8 +199,17 @@ async function scrapeWithPuppeteer() {
 }
 
 async function fetchONPEData() {
-    if (isFetching) return cachedData;
+    if (isFetching) {
+        const age = fetchStartTime ? (Date.now() - fetchStartTime) / 1000 : 0;
+        if (age > 90) {
+            console.log('Scrape stale (' + Math.round(age) + 's), forzando reset...');
+            isFetching = false;
+        } else {
+            return cachedData;
+        }
+    }
     isFetching = true;
+    fetchStartTime = Date.now();
 
     try {
         const result = await Promise.race([
@@ -218,6 +228,7 @@ async function fetchONPEData() {
         return null;
     } finally {
         isFetching = false;
+        fetchStartTime = null;
     }
 }
 
@@ -323,4 +334,4 @@ app.listen(PORT, async () => {
     setTimeout(() => fetchONPEData().then(d => console.log(d ? 'Datos OK' : 'Sin datos')), 1000);
 });
 
-setInterval(() => fetchONPEData(), 20000);
+setInterval(() => fetchONPEData(), 45000);
