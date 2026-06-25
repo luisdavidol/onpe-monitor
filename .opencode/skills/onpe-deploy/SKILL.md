@@ -180,7 +180,10 @@ Solo si la Fase 4 pasó exitosamente.
 ### 5.1 Deploy backend
 
 ```powershell
-& "$env:LOCALAPPDATA\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" run deploy onpe-backend --source . --region=us-central1 --allow-unauthenticated --project=onpe-elecciones-2026 --memory=2Gi --quiet
+& "$env:LOCALAPPDATA\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" run deploy onpe-backend --source . --region=us-central1 --allow-unauthenticated --project=onpe-elecciones-2026 --memory=2Gi --min-instances=1 --quiet
+# --min-instances=1 is MANDATORY: without it Cloud Run throttlea CPU en 0 tráfico,
+# el setInterval background scraper no renderiza Chrome y devuelve "Sin datos" (ceros).
+# El cache se queda pegado en datos viejos. Ver Issues/2026-06-12_web-sin-datos-chrome-cloudrun.md
 ```
 
 Working directory: `D:\GIT\onpe`
