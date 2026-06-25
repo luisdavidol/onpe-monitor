@@ -155,6 +155,23 @@
 
         .update-info { text-align: center; color: #64748b; font-size: 0.7rem; }
         .countdown { color: #fbbf24; font-weight: 600; }
+        .timing-box {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-top: 8px;
+            font-size: 0.65rem;
+            color: #475569;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .timing-box .t-label { color: #64748b; }
+        .timing-box .t-val { color: #94a3b8; font-weight: 600; }
+        .freshness { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 600; }
+        .freshness.fresh { background: rgba(74,222,128,0.15); color: #4ade80; }
+        .freshness.stale { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .freshness.old { background: rgba(239,68,68,0.15); color: #ef4444; }
 
         .status { text-align: center; margin-top: 6px; }
         .status-dot {
@@ -463,7 +480,11 @@
 
             <div class="update-info" style="margin-top: 12px;">
                 Actualizado: <span id="lastUpdate">-</span><br>
-                Proxima actualizacion: <span class="countdown" id="countdown">0:45</span>
+                Proxima actualizacion: <span class="countdown" id="countdown">0:30</span>
+            </div>
+            <div class="timing-box" id="timingBox">
+                <span class="t-label">Scrape:</span> <span class="t-val" id="scrapeTime">-</span> &middot;
+                <span class="t-label">Datos:</span> <span class="freshness fresh" id="freshness">-</span>
             </div>
         </div>
         </div>
@@ -513,12 +534,15 @@
     <script>
         const API_URL = 'https://onpe-backend-656880564600.us-central1.run.app/api';
 
-        let countdown = 45;
+        let countdown = 30;
         let timer;
         let socialTimer;
         let phraseIdx1 = 0;
         let phraseIdx2 = 0;
         let likedSession = false;
+        let hasShownData = false;
+        let retryCount = 0;
+        let fetchInProgress = false;
 
         const frasesKeiko = [
             "La cuarta fue la vencida!",
@@ -585,11 +609,15 @@
                 '<div class="error">' + msg + '<button onclick="fetchData()">Reintentar</button></div>';
         }
 
+        function clearError() {
+            document.getElementById('error').innerHTML = '';
+        }
+
         function updateUI(data) {
-            const total = data.candidate1.votes + data.candidate2.votes;
-            const p1 = total > 0 ? ((data.candidate1.votes / total) * 100).toFixed(3) : 0;
-            const p2 = total > 0 ? ((data.candidate2.votes / total) * 100).toFixed(3) : 0;
-            const diff = Math.abs(data.candidate1.votes - data.candidate2.votes);
+            var total = data.candidate1.votes + data.candidate2.votes;
+            var p1 = total > 0 ? ((data.candidate1.votes / total) * 100).toFixed(3) : 0;
+            var p2 = total > 0 ? ((data.candidate2.votes / total) * 100).toFixed(3) : 0;
+            var diff = Math.abs(data.candidate1.votes - data.candidate2.votes);
 
             document.getElementById('actas').textContent = 'Actas contabilizadas: ' + data.actasContabilizadas + '%';
 
@@ -631,7 +659,7 @@
                 phraseIdx1++;
                 document.getElementById('img1').src = 'Keiko%20feliz.png?v=3';
                 document.getElementById('img2').src = 'RS%20triste.png?v=3';
-            } else {
+            } else if (total > 0) {
                 document.getElementById('card2').classList.add('winner');
                 document.getElementById('card1').classList.remove('winner');
                 document.getElementById('winnerBox').classList.add('losing');
@@ -642,44 +670,92 @@
                 document.getElementById('img2').src = 'RS%20feliz.png?v=3';
             }
 
-            var updateTime = new Date(data.timestamp);
-            var formattedDate = updateTime.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            var formattedTime = updateTime.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById('lastUpdateInfo').textContent = 'Ultima actualizacion: ' + formattedDate + ' ' + formattedTime;
-            document.getElementById('lastUpdate').textContent = formattedTime;
+            if (data.timestamp) {
+                var updateTime = new Date(data.timestamp);
+                var formattedDate = updateTime.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                var formattedTime = updateTime.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                document.getElementById('lastUpdateInfo').textContent = 'Ultima actualizacion: ' + formattedDate + ' ' + formattedTime;
+                document.getElementById('lastUpdate').textContent = formattedTime;
+            }
 
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('content').style.display = 'block';
-            document.getElementById('error').innerHTML = '';
-            startTimer();
+            if (!hasShownData) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                hasShownData = true;
+            }
+            clearError();
         }
 
         async function fetchData() {
+            if (fetchInProgress) return;
+            fetchInProgress = true;
+
             try {
                 var response = await fetch(API_URL + '/results');
-                if (!response.ok) throw new Error('Error del servidor');
+                if (!response.ok) throw new Error('Error del servidor ' + response.status);
                 var data = await response.json();
-                updateUI(data);
+                retryCount = 0;
+
+                if (data.timestamp) {
+                    updateUI(data);
+                } else if (!hasShownData) {
+                    document.getElementById('loading').innerHTML =
+                        '<span class="spinner"></span> Esperando datos de ONPE...';
+                }
+
+                if (data._meta) {
+                    var scrapeSec = data._meta.scrapeDurationMs ? (data._meta.scrapeDurationMs / 1000).toFixed(1) + 's' : '-';
+                    document.getElementById('scrapeTime').textContent = scrapeSec;
+
+                    var ageMs = data._meta.cacheAgeMs || 0;
+                    var ageSec = Math.round(ageMs / 1000);
+                    var freshnessEl = document.getElementById('freshness');
+                    if (data._meta.isFetching) {
+                        freshnessEl.textContent = 'Actualizando...';
+                        freshnessEl.className = 'freshness stale';
+                    } else if (ageSec < 60) {
+                        freshnessEl.textContent = 'En vivo';
+                        freshnessEl.className = 'freshness fresh';
+                    } else if (ageSec < 300) {
+                        freshnessEl.textContent = ageSec + 's';
+                        freshnessEl.className = 'freshness stale';
+                    } else {
+                        freshnessEl.textContent = Math.round(ageSec / 60) + 'min';
+                        freshnessEl.className = 'freshness old';
+                    }
+
+                    if (data._meta.error && !data._meta.hasData) {
+                        showError('Servidor iniciando... datos en camino');
+                    } else if (data._meta.error && data._meta.consecutiveErrors > 2) {
+                        showError('ONPE con problemas. Mostrando ultimos datos disponibles.');
+                    }
+                }
+
                 document.getElementById('status').innerHTML =
-                    '<span class="status-dot online"></span><span class="status-text">Conectado - Actualizando cada 1 min</span>';
+                    '<span class="status-dot online"></span><span class="status-text">Conectado</span>';
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('loading').style.display = 'none';
-                showError('No se pudo conectar al servidor. Intenta de nuevo mas tarde.');
+                retryCount++;
+                if (!hasShownData) {
+                    document.getElementById('loading').innerHTML =
+                        '<span class="spinner"></span> Conectando... (intento ' + retryCount + ')';
+                }
                 document.getElementById('status').innerHTML =
-                    '<span class="status-dot offline"></span><span class="status-text">Desconectado</span>';
+                    '<span class="status-dot offline"></span><span class="status-text">Reconectando...</span>';
+            } finally {
+                fetchInProgress = false;
             }
         }
 
         function startTimer() {
             clearInterval(timer);
-            countdown = 45;
+            countdown = 30;
             updateCountdown();
             timer = setInterval(function() {
                 countdown--;
                 updateCountdown();
                 if (countdown <= 0) {
-                    countdown = 45;
+                    countdown = 30;
                     fetchData();
                 }
             }, 1000);
@@ -687,7 +763,7 @@
 
         function updateCountdown() {
             if (countdown < 0) countdown = 0;
-            if (countdown > 45) countdown = 45;
+            if (countdown > 30) countdown = 30;
             var m = Math.floor(countdown / 60);
             var s = countdown % 60;
             document.getElementById('countdown').textContent = m + ':' + (s < 10 ? '0' : '') + s;
@@ -706,7 +782,7 @@
 
         function startSocialPolling() {
             refreshSocial();
-            socialTimer = setInterval(refreshSocial, 5000);
+            socialTimer = setInterval(refreshSocial, 10000);
         }
 
         async function registerView() {

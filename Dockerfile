@@ -1,14 +1,12 @@
-FROM node:20-slim
+FROM node:20
 
 RUN apt-get update && apt-get install -y \
     chromium \
-    fonts-freefont-ttf \
-    fonts-noto-color-emoji \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV NODE_OPTIONS="--max-old-space-size=512"
 
 WORKDIR /app
 
