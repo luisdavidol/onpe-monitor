@@ -82,7 +82,10 @@ async function scrapePage(browser, url, extractor) {
         await page.setDefaultNavigationTimeout(30000);
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
         await new Promise(r => setTimeout(r, 15000));
-        const result = await page.evaluate(extractor);
+        const pageText = await page.evaluate(() => document.body.innerText);
+        const short = pageText.substring(0, 60).replace(/\n/g, ' | ');
+        console.log(`[${url.split('/').pop()}] text(${pageText.length}): "${short}"`);
+        const result = await page.evaluate(`(${extractor.toString()})()`);
         return result;
     } catch (e) {
         console.error(`scrapePage(${url.split('/').pop()}):`, e.message.substring(0, 60));
